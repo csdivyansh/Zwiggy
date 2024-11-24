@@ -52,6 +52,7 @@ def admin():
     return render_template('admin_restaurants.html', restaurants=restaurants)
 
 @app.route('/restaurants/new/', methods=['GET', 'POST'])
+@login_required
 
 def newRestaurant():
     if request.method == 'POST':
@@ -169,11 +170,7 @@ def newMenuItem(restaurant_id):
 # Protect routes requiring login
 @app.route('/restaurants/<int:restaurant_id>/<int:menu_id>/edit', methods=['GET', 'POST'])
 @login_required
-def editMenuItem(restaurant_id, menu_id):
-    if not current_user.is_admin():
-        flash('You must be an admin to edit menu items!', 'error')
-        return redirect(url_for('restaurantMenu', restaurant_id=restaurant_id))
-    
+def editMenuItem(restaurant_id, menu_id):    
     editedItem = session.query(MenuItem).filter_by(id=menu_id).one()
     if request.method == 'POST':
         if request.form['name']:
@@ -188,10 +185,6 @@ def editMenuItem(restaurant_id, menu_id):
 @app.route('/restaurants/<int:restaurant_id>/<int:menu_id>/delete', methods=['GET', 'POST'])
 @login_required
 def deleteMenuItem(restaurant_id, menu_id):
-    if not current_user.is_admin():
-        flash('You must be an admin to delete menu items!', 'error')
-        return redirect(url_for('restaurantMenu', restaurant_id=restaurant_id))
-
     itemToDelete = session.query(MenuItem).filter_by(id=menu_id).one()
     if request.method == 'POST':
         session.delete(itemToDelete)
