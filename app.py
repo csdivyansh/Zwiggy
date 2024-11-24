@@ -200,10 +200,3 @@ def deleteMenuItem(restaurant_id, menu_id):
         return redirect(url_for('restaurantMenu', restaurant_id=restaurant_id))
     else:
         return render_template('deletemenuitem.html', item=itemToDelete)
-
-# Other routes remain unchanged, but now they are protected by login_required for admin actions
-
-if __name__ == '__main__':
-    app.secret_key = '2eac451658c45531a2cd26601e85c6eb'
-    app.debug = True
-    app.run(host='0.0.0.0', port=8085)
