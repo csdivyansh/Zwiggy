@@ -7,13 +7,11 @@ from database_setup import Base, Restaurant, MenuItem, User
 import os
 
 app = Flask(__name__)
-
 app.config['SECRET_KEY'] = os.urandom(24)
 
 # Database setup
 engine = create_engine('sqlite:///restaurantmenu.db')
 Base.metadata.bind = engine
-
 DBSession = sessionmaker(bind=engine)
 session = DBSession()
 
@@ -21,29 +19,16 @@ session = DBSession()
 login_manager = LoginManager()
 login_manager.init_app(app)
 
-@app.route('/')
-def home():
-    return render_template('index.html')
-
 @login_manager.unauthorized_handler
 def unauthorized():
     flash('You must be logged in to access this page.', 'error')
     return redirect(url_for('login'))
 
-@app.route('/restaurants/')
-def restaurants():
-    restaurants = session.query(Restaurant).all()
-    return render_template('restaurants.html', restaurants=restaurants)
-
-@app.route('/restaurants/<int:restaurant_id>/JSON')
-def restaurantMenuJSON(restaurant_id):
-    restaurant = session.query(Restaurant).filter_by(id=restaurant_id).one()
-    items = session.query(MenuItem).filter_by(restaurant_id=restaurant.id).all()
-    return jsonify(MenuItems = [i.serialize for i in items])
-
 @login_manager.user_loader
 def load_user(user_id):
     return session.query(User).get(user_id)
+
+#For Admins
 
 @app.route('/admin/')
 @login_required
@@ -53,33 +38,33 @@ def admin():
 
 @app.route('/restaurants/new/', methods=['GET', 'POST'])
 @login_required
-
 def newRestaurant():
     if request.method == 'POST':
         name = request.form.get('name')
         restaurant1 = Restaurant(name=name)
         session.add(restaurant1)
         session.commit()
-        return redirect(url_for('restaurants'))
+        return redirect(url_for('admin'))
 
     return render_template('newrestaurant.html')
 
-@app.route('/restaurants/JSON/')
-def restaurantsJSON():
-    restaurants = session.query(Restaurant).all()
-    return jsonify(RestaurantNames = [i.serialize() for i in restaurants])
+@app.route('/admin/<int:restaurant_id>/delete/', methods=['POST'])
+@login_required
+def delete(restaurant_id):
+    try:
+        itemToDelete = session.query(Restaurant).filter_by(id=restaurant_id).one_or_none()
+        if not itemToDelete:
+            flash("Restaurant not found.", 'error')
+            return redirect(url_for('admin'))
 
-@app.route('/restaurants/<int:restaurant_id>/')
-def UserMenu(restaurant_id):
-    restaurant = session.query(Restaurant).filter_by(id=restaurant_id).one()
-    items = session.query(MenuItem).filter_by(restaurant_id=restaurant.id).all()
-    return render_template('user_menu.html', restaurant=restaurant, items=items)
+        session.delete(itemToDelete)
+        session.commit()
+        flash("Restaurant Deleted!", 'success')
+    except Exception as e:
+        flash(f"An error occurred: {e}", 'error')
+    return redirect(url_for('admin'))
 
-@app.route('/restaurants/<int:restaurant_id>/menu/')
-def restaurantMenu(restaurant_id):
-    restaurant = session.query(Restaurant).filter_by(id=restaurant_id).one()
-    items = session.query(MenuItem).filter_by(restaurant_id=restaurant.id).all()
-    return render_template('menu.html', restaurant=restaurant, items=items)
+
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -132,7 +117,7 @@ def register():
     return render_template('register.html')
 
 
-@app.route('/restaurants/<int:restaurant_id>/menu/new/', methods=['GET', 'POST'])
+@app.route('/admin/<int:restaurant_id>/menu/new/', methods=['GET', 'POST'])
 @login_required
 def newMenuItem(restaurant_id):
     restaurant = session.query(Restaurant).filter_by(id=restaurant_id).one()
@@ -168,7 +153,7 @@ def newMenuItem(restaurant_id):
     return render_template('newmenuitem.html', restaurant=restaurant)
 
 # Protect routes requiring login
-@app.route('/restaurants/<int:restaurant_id>/<int:menu_id>/edit', methods=['GET', 'POST'])
+@app.route('/admin/<int:restaurant_id>/<int:menu_id>/edit', methods=['GET', 'POST'])
 @login_required
 def editMenuItem(restaurant_id, menu_id):    
     editedItem = session.query(MenuItem).filter_by(id=menu_id).one()
@@ -182,7 +167,7 @@ def editMenuItem(restaurant_id, menu_id):
     else:
         return render_template('editmenuitem.html', restaurant_id=restaurant_id, menu_id=menu_id, item=editedItem)
 
-@app.route('/restaurants/<int:restaurant_id>/<int:menu_id>/delete', methods=['GET', 'POST'])
+@app.route('/admin/<int:restaurant_id>/<int:menu_id>/delete', methods=['GET', 'POST'])
 @login_required
 def deleteMenuItem(restaurant_id, menu_id):
     itemToDelete = session.query(MenuItem).filter_by(id=menu_id).one()
@@ -193,3 +178,40 @@ def deleteMenuItem(restaurant_id, menu_id):
         return redirect(url_for('restaurantMenu', restaurant_id=restaurant_id))
     else:
         return render_template('deletemenuitem.html', item=itemToDelete)
+
+
+# For Users
+@app.route('/')
+def home():
+    return render_template('index.html')
+
+@app.route('/restaurants/')
+def restaurants():
+    restaurants = session.query(Restaurant).all()
+    return render_template('restaurants.html', restaurants=restaurants)
+
+@app.route('/restaurants/JSON/')
+def restaurantsJSON():
+    restaurants = session.query(Restaurant).all()
+    return jsonify(RestaurantNames = [i.serialize() for i in restaurants])
+
+@app.route('/restaurants/<int:restaurant_id>/')
+def UserMenu(restaurant_id):
+    restaurant = session.query(Restaurant).filter_by(id=restaurant_id).one()
+    items = session.query(MenuItem).filter_by(restaurant_id=restaurant.id).all()
+    return render_template('user_menu.html', restaurant=restaurant, items=items)
+
+@app.route('/restaurants/<int:restaurant_id>/usermenu/')
+def restaurantMenu(restaurant_id):
+    restaurant = session.query(Restaurant).filter_by(id=restaurant_id).one()
+    items = session.query(MenuItem).filter_by(restaurant_id=restaurant.id).all()
+    return render_template('menu.html', restaurant=restaurant, items=items)
+
+@app.route('/restaurants/<int:restaurant_id>/JSON')
+def restaurantMenuJSON(restaurant_id):
+    restaurant = session.query(Restaurant).filter_by(id=restaurant_id).one()
+    items = session.query(MenuItem).filter_by(restaurant_id=restaurant.id).all()
+    return jsonify(MenuItems = [i.serialize for i in items])
+
+# if __name__=='__main__':
+#     app.run(debug=True,host ='0.0.0.0' ,port = 8085)
