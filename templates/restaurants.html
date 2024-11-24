@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restaurants</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='restaurant.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    
+
+    <div class="res_header">
+        Restaurants List
+    </div>
+
+    <form method="GET" action="{{ url_for('restaurants') }}" class="search-form">
+        <input type="text" name="q" placeholder="Search restaurants..." value="{{ query }}">
+        <button type="submit">Search</button>
+    </form>
+    
+    <div class="restaurants-container">
+        {% for i in restaurants %}
+        <div class="restaurant-item">
+            <a href="{{ url_for('UserMenu', restaurant_id=i.id) }}">{{ i.name }}</a>
+        </div>
+        {% endfor %}
+    </div>
+
+</body>
+
+</html>
