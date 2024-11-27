@@ -213,5 +213,5 @@ def restaurantMenuJSON(restaurant_id):
     items = session.query(MenuItem).filter_by(restaurant_id=restaurant.id).all()
     return jsonify(MenuItems = [i.serialize for i in items])
 
-# if __name__=='__main__':
-#     app.run(debug=True,host ='0.0.0.0' ,port = 8085)
+if __name__=='__main__':
+    app.run(debug=True, host ='0.0.0.0' ,port = 8085)
