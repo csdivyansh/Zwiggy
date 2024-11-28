@@ -17,6 +17,7 @@ body {
     width: 100%;
     max-width: 400px;
     box-sizing: border-box;
+    user-select: none;
 }
 
 .register-container h1 {
@@ -29,6 +30,7 @@ body {
 .register-container form {
     display: flex;
     flex-direction: column;
+    user-select: none;
 }
 
 .register-container input {
@@ -38,11 +40,13 @@ body {
     border-radius: 5px;
     font-size: 16px;
     box-sizing: border-box;
+    user-select: none;
 }
 
 .register-container input:focus {
     border-color: #007bff;
     outline: none;
+    user-select: none;
 }
 
 .register-container button {
@@ -75,3 +79,40 @@ body {
 .register-container a:hover {
     text-decoration: underline;
 }
+
+.captcha-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 20px;
+  }
+
+  .captcha {
+    font-size: 1.5rem;
+    font-weight: bold;
+    padding: 10px 20px;
+    background: #f4f4f4;
+    border: 2px solid #ccc;
+    border-radius: 5px;
+    letter-spacing: 3px;
+    color: #333;
+    text-align: center;
+    user-select: none; /* Prevent copying */
+  }
+
+  .captcha-refresh {
+    margin-left: 10px;
+    cursor: pointer;
+    color: #007bff;
+    text-decoration: underline;
+    font-size: 0.9rem;
+  }
+
+  .captcha-input {
+    width: 100%;
+    padding: 10px;
+    margin-top: 10px;
+    font-size: 1rem;
+    border: 2px solid #ccc;
+    border-radius: 5px;
+  }
