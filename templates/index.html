@@ -4,45 +4,28 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Zwiggy</title>
-    <link
-      rel="stylesheet"
-      href="{{ url_for('static', filename='home.css') }}"
-    />
+    <link rel="stylesheet" href="/static/home.css">
+
   </head>
   <body>
     
-    <header class="hero">
-      <div class="overlay">
-        <nav>
-          <ul>
-            <li><a href="#">Get the App</a></li>
-            <li><a href="#">Investor Relations</a></li>
-            <li><a href="#">Add Restaurant</a></li>
-            <li><a href="http://localhost:8085/login/">Login</a></li>
-            <li><a href="http://localhost:8085/register/">Sign Up</a></li>
-          </ul>
-        </nav>
-        <div class="hero-content">
-          <h1>Zwiggy</h1>
-          <p>Discover the best food & drinks in your city</p>
-          <div class="search-bar">
-            <input type="text" placeholder="Search for restaurant, cuisine, or dish" />
-            <button>Search</button>
-          </div>
-        </div>
-      </div>
-    </header>
-    <section class="features">
-      <div class="feature-card">
-        <img src="images\img.png" alt="Order Online" />
-        <h3>Order Online</h3>
-        <p>Stay home and order to your doorstep</p>
-      </div>
-      <div class="feature-card">
-        <img src="images\img.png" alt="Dining" />
-        <h3>Dining</h3>
-        <p>View the city's favourite dining venues</p>
-      </div>
-    </section>
+    <div class="hero">
+      <h1>Welcome to Zwiggy</h1>
+      <p>Experience the finest dining with us.</p>
+      <a href="http://localhost:8085/restaurants/" class="cta">View Restaurant Lists</a>
+    </div>
+
+    <!-- Top-right corner buttons -->
+    <div class="top-buttons">
+      <a href="http://localhost:8085/login/" class="cta-login">
+       
+        Login
+      </a>
+      <a href="http://localhost:8085/register/" class="cta-register">
+      
+        Register
+      </a>
+    </div>
+    
   </body>
 </html>
