@@ -9,12 +9,16 @@ body {
   flex-direction: column;
   align-items: center;
 }
+#content {
+  display: block; /* Ensure content is visible by default */
+}
 
 .res_header {
   font-size: 2.5rem;
   font-weight: 700;
   text-align: center;
   margin: 20px 0 40px;
+  
   color: #2c3e50;
   text-transform: uppercase;
   letter-spacing: 2px;
@@ -36,6 +40,7 @@ p {
   margin: 10px auto 0;
   border-radius: 2px;
 }
+
 
 /* Search Bar */
 .search-form {
@@ -90,6 +95,7 @@ p {
 .create-new-button {
   background-color: #ffffff;
   border-radius: 15px;
+  text-align: center;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
   overflow: hidden;
   transition: transform 0.3s, box-shadow 0.3s;
@@ -166,4 +172,102 @@ p {
   .search-form input[type="text"] {
     width: 100%;
   }
+}
+/* 
+position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 999; */
+/* Positioning the log-out button at the top-right corner */
+/* Styling the logout button */
+/* Logout Button */
+/* Logout Button */
+.logout-button {
+  position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 999; 
+  display: inline-block;
+  margin: 8px 15px;
+  padding: 8px 10px;
+  font-size: 1rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  text-decoration: none; /* Remove underline */
+  border-radius: 10px; /* Less rounded */
+  background: rgba(255, 255, 255, 0.5); /* Transparent background */
+  color: #e74c3c; /* Red color text */
+  border: 1px solid rgba(231, 76, 60, 0.5); /* Smaller border */
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+
+.admin_dashboard-button {
+  position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 999; 
+  display: inline-block;
+  margin: 8px 15px;
+  padding: 8px 10px;
+  font-size: 1rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  text-decoration: none; /* Remove underline */
+  border-radius: 10px; /* Less rounded */
+  background: rgba(255, 255, 255, 0.5); /* Transparent background */
+  color: #e74c3c; /* Red color text */
+  border: 1px solid rgba(231, 76, 60, 0.5); /* Smaller border */
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+
+.admin_dashboard-button a {
+  color: inherit; /* Inherit the color from parent */
+  text-decoration: none; /* Remove underline from link */
+  display: inline-block; /* Ensures proper padding and alignment */
+}
+
+.admin_dashboard-button:hover {
+  background: rgba(216, 10, 10, 0.5); /* Slightly more visible red background on hover */
+  border-color: rgba(231, 76, 60, 0.999); /* Darker red border on hover */
+  color: #fff; /* White text on hover */
+ 
+  transform: translateY(-3px); /* Lift the button on hover */
+}
+
+.admin_dashboard-button:active {
+  transform: translateY(2px); /* Button presses down on click */
+  box-shadow: 0 3px 8px rgba(231, 76, 60, 0.3); /* Red shadow for pressed effect */
+}
+
+
+.logout-button a {
+  color: inherit; /* Inherit the color from parent */
+  text-decoration: none; /* Remove underline from link */
+  display: inline-block; /* Ensures proper padding and alignment */
+}
+
+.logout-button:hover {
+  background: rgba(216, 10, 10, 0.5); /* Slightly more visible red background on hover */
+  border-color: rgba(231, 76, 60, 0.999); /* Darker red border on hover */
+  color: #fff; /* White text on hover */
+ 
+  transform: translateY(-3px); /* Lift the button on hover */
+}
+
+.logout-button:active {
+  transform: translateY(2px); /* Button presses down on click */
+  box-shadow: 0 3px 8px rgba(231, 76, 60, 0.3); /* Red shadow for pressed effect */
+}
+
+/* Positioning the logout button */
+.top-buttons {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+}
+
+.top-buttons a {
+  margin-left: 10px;
 }
