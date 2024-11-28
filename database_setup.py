@@ -1,7 +1,6 @@
 import sys
 import os
-
-from sqlalchemy import Column, ForeignKey, Integer, String , Boolean
+from sqlalchemy import Column, ForeignKey, Integer, String
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 from sqlalchemy import create_engine
@@ -16,7 +15,6 @@ class User(Base, UserMixin):
     username = Column(String, nullable=False, unique=True)
     password = Column(String, nullable=False)
     role = Column(String, nullable=False, default='user')  # Default role is 'user'
-    is_approved = Column(Boolean, default=False)
 
     def is_admin(self):
         return self.role == 'admin'

@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit Page</title>
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='edit.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='restaurant.css') }}">
 </head>
 <body>
     <form action= "{{url_for('editMenuItem', restaurant_id = restaurant_id, menu_id=item.id)}}" method = 'POST'>
@@ -14,6 +14,6 @@
         
         <input type='submit' value='Edit'>
     </form>
-    <a href= "{{url_for('restaurantMenu', restaurant_id= item.restaurant_id)}}" class="cancel-button">Cancel</a>
+    <a href= "{{url_for('restaurantMenu', restaurant_id= item.restaurant_id)}}">Cancel</a>
 </body>
 </html>

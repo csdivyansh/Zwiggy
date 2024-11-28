@@ -9,30 +9,20 @@
 </head>
 
 <body>
-    <!-- Log Out Button -->
-    <div class="logout-button">
-        <a href="{{ url_for('logout') }}">LogOut</a>
-    </div>
-    
     <div class="res_header">
         Restaurants List
     </div>
-    
     <div>
         {% with messages = get_flashed_messages() %}
         {% if messages %}
         {% for message in messages %}
-        <strong> {{ message }} </strong>
+            <strong> {{ message }} </strong>
         {% endfor %}
         {% endif %}
         {% endwith %}
-    </div>
+	</div>
     <br>
-    <div class="admin_dashboard-button">
-        <a href="{{ url_for('admin_dashboard') }}">Admin Dashboard</a>
-    </div>
-    <br>
-    <div class='create-new-button'>
+    <div class = 'create-new-button'>
         <a href="{{ url_for('newRestaurant') }}">Add New Restaurant</a>
     </div>
     <br>
