@@ -11,7 +11,7 @@ import redis
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.urandom(24)
-redis_client = redis.StrictRedis(host='localhost', port=6379, db=0)
+
 
 # Database setup
 engine = create_engine('sqlite:///restaurantmenu.db')
@@ -23,11 +23,7 @@ db_session = DBSession()  # Renamed from session to db_session to avoid conflict
 login_manager = LoginManager()
 login_manager.init_app(app)
 
-def set_redis_session(session_id, data, ttl=3600):
-    redis_client.setex(f"session:{session_id}", ttl, data)
 
-def get_redis_session(session_id):
-    return redis_client.get(f"session:{session_id}")
 
 @login_manager.unauthorized_handler
 def unauthorized():
@@ -151,10 +147,7 @@ def generate_captcha(length=4, use_digits=True, use_letters=True, use_both=True)
     
     return captcha_code.upper()
 
-@app.route('/get_session/<session_id>')
-def get_session_data(session_id):
-    user = get_redis_session(session_id)
-    return f"User: {user.decode()}" if user else "Session not found!"
+
 
 @app.route('/login/', methods=['GET', 'POST'])
 def login():
@@ -173,7 +166,7 @@ def login():
 
         # Check CAPTCHA solution
         if captcha_answer != session.get('captcha_solution'):
-            flash(user, 'error')
+            flash('Invalid CAPTCHA ! Please try again.', 'error')
             captcha_code = generate_captcha()  # Generate new CAPTCHA if answer is wrong
             session['captcha_solution'] = captcha_code
             return render_template('login.html', captcha=captcha_code)
