@@ -7,7 +7,11 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from database_setup import Base, Restaurant, MenuItem, User
 import os
+import io
 import redis
+from PIL import  Image, ImageDraw, ImageFont
+from flask import Response
+
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.urandom(24)
@@ -23,6 +27,18 @@ db_session = DBSession()  # Renamed from session to db_session to avoid conflict
 login_manager = LoginManager()
 login_manager.init_app(app)
 
+def validate_password(password):
+    if len(password) < 8:
+        return "Password must be at least 8 characters long."
+    if not any(char.isupper() for char in password):
+        return "Password must contain at least one uppercase letter."
+    if not any(char.islower() for char in password):
+        return "Password must contain at least one lowercase letter."
+    if not any(char.isdigit() for char in password):
+        return "Password must contain at least one digit."
+    if not any(char in "!@#$%^&*()" for char in password):
+        return "Password must contain at least one special character (!@#$%^&*())."
+    return None
 
 
 @login_manager.unauthorized_handler
@@ -38,7 +54,7 @@ def load_user(user_id):
 @app.route('/admin/approve_users')
 @login_required
 def approve_users():
-    if current_user.role != 'admin':
+    if current_user.role not in ['admin', 'owner']:
         flash('You must be an admin to access this page.', 'error')
         return redirect(url_for('home'))
 
@@ -50,7 +66,7 @@ def approve_users():
 @app.route('/admin/admin_dashboard/<int:user_id>/approve', methods=['POST','GET'])
 @login_required
 def approve_user(user_id):
-    if current_user.role != 'admin':
+    if current_user.role not in ['admin', 'owner']:
         flash('You must be an admin to approve users.', 'error')
         return redirect(url_for('home'))
 
@@ -68,15 +84,15 @@ def approve_user(user_id):
 @app.route('/admin/admin_dashboard/<int:user_id>/reject', methods=['POST','GET'])
 @login_required
 def reject_user(user_id):
-    if current_user.role != 'admin':
-        flash('You must be an admin to reject users.', 'error')
+    if current_user.role not in ['admin', 'owner']:
+        flash('You must be an admin/owner to reject users.', 'error')
         return redirect(url_for('home'))
 
     user_to_reject = db_session.query(User).filter_by(id=user_id).one_or_none()
     if user_to_reject:
-        db_session.delete(user_to_reject)
+        user_to_reject.role = 'rejected'
         db_session.commit()
-        flash(f'User {user_to_reject.username} has been rejected and deleted!', 'info')
+        flash(f'User {user_to_reject.username} has been rejected', 'info')
     else:
         flash('User not found.', 'error')
 
@@ -86,21 +102,22 @@ def reject_user(user_id):
 @app.route('/admin/dashboard')
 @login_required
 def admin_dashboard():
-    if current_user.role != 'admin':
-        flash('You must be an admin to access this page.', 'error')
+    if current_user.role not in ['admin', 'owner']:
+        flash('You must be an admin/owner to access this page.', 'error')
         return redirect(url_for('restaurants'))
 
+    users = db_session.query(User).all()
     pending_users = db_session.query(User).filter_by(is_approved=False).all()
     pending_users_count = len(pending_users)
     
-    return render_template('admin_dashboard.html', users=pending_users, pending_users_count=pending_users_count)
+    return render_template('admin_dashboard.html', users=users, pending_users_count=pending_users_count)
 
 
 # For Admins
 @app.route('/admin/')
 @login_required
 def admin():
-    restaurants = db_session.query(Restaurant).all()  # Updated to use db_session
+    restaurants = db_session.query(Restaurant).all() 
     return render_template('admin_restaurants.html', restaurants=restaurants)
 
 @app.route('/restaurants/new/', methods=['GET', 'POST'])
@@ -118,6 +135,7 @@ def newRestaurant():
 @app.route('/admin/<int:restaurant_id>/delete/', methods=['POST'])
 @login_required
 def delete(restaurant_id):
+
     try:
         itemToDelete = db_session.query(Restaurant).filter_by(id=restaurant_id).one_or_none()  # Updated to use db_session
         if not itemToDelete:
@@ -131,6 +149,51 @@ def delete(restaurant_id):
         flash(f"An error occurred: {e}", 'error')
     return redirect(url_for('admin'))
 
+from PIL import Image, ImageDraw, ImageFont
+
+def generate_captcha_image(captcha_code):
+    # Create a blank image with white background
+    width, height = 120, 50
+    image = Image.new('RGB', (width, height), color='white')
+
+    # Initialize drawing context
+    draw = ImageDraw.Draw(image)
+
+
+    # Neon color for the text
+    neon_color = (0, 0, 255)  # Neon blue
+    glow_color = (255, 105, 180,80)  # Semi-transparent green for glow effect
+    glow_color2 = (0, 255, 0 , 80)
+    # Set font (you can customize the font)
+    try:
+        font = ImageFont.truetype("arial.ttf", 36)
+    except IOError:
+        font = ImageFont.load_default()
+
+    # Calculate the text size using textbbox (recommended method in Pillow 8.0+)
+    text_bbox = draw.textbbox((0, 0), captcha_code, font=font)
+    text_width = text_bbox[2] - text_bbox[0]
+    text_height = text_bbox[3] - text_bbox[1]
+
+    # Calculate position to center the text
+    position = ((width - text_width) // 2, (height - text_height) // 2)
+
+    # Add the CAPTCHA text to the image
+     # Create a glowing effect by drawing shadows
+    for offset in range(3, 0, -1):  # Draw shadow around the text
+        draw.text((position[0] + offset, position[1] + offset), captcha_code, fill=glow_color, font=font)
+    # for offset in range(4, 0, -1):  # Draw shadow around the text
+    #     draw.text((position[0] + offset, position[1] + offset), captcha_code, fill=glow_color2, font=font)
+
+    # Now draw the actual text on top
+    draw.text(position, captcha_code, fill=neon_color, font=font)
+    # Optionally, you can add random noise or lines for additional security
+
+    # Return the image
+    return image
+
+
+    
 def generate_captcha(length=4, use_digits=True, use_letters=True, use_both=True):
     # Define possible characters for CAPTCHA
     if use_both:
@@ -147,7 +210,23 @@ def generate_captcha(length=4, use_digits=True, use_letters=True, use_both=True)
     
     return captcha_code.upper()
 
-
+@app.route('/captcha_image/')
+def captcha_image():
+    captcha_code = generate_captcha()
+    
+    # Save the CAPTCHA text to session
+    session['captcha_solution'] = captcha_code
+    
+    # Generate CAPTCHA image
+    image = generate_captcha_image(captcha_code)
+    
+    # Convert the image to a byte stream
+    img_io = io.BytesIO()
+    image.save(img_io, 'PNG')
+    img_io.seek(0)
+    
+    # Return the image as a response with the correct content type
+    return Response(img_io, mimetype='image/png')
 
 @app.route('/login/', methods=['GET', 'POST'])
 def login():
@@ -162,7 +241,6 @@ def login():
         password = request.form['password']
         
         captcha_answer = request.form['captcha']
-        # refresh_captcha = request.method=='GET'? True:False
 
         # Check CAPTCHA solution
         if captcha_answer != session.get('captcha_solution'):
@@ -209,6 +287,11 @@ def register():
         
         username = request.form['username']
         password = request.form['password']
+        error = validate_password(password)
+        if error:
+            flash(error)
+            return redirect('/register')
+        flash("Password is valid!")
 
         captcha_answer = request.form['captcha']
         # refresh_captcha = request.method=='GET'? True:False

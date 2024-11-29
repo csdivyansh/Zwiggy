@@ -28,7 +28,7 @@
 
         <!-- Custom CAPTCHA -->
         <div class="captcha-container">
-          <div class="captcha">{{ captcha }}</div>
+          <div class="captcha"><img src="{{ url_for('captcha_image') }}" alt="Captcha Image" /></div>
           <a href="{{ url_for('login', refresh_captcha=True) }}" id="refresh-captcha">Refresh</a>
         
           
@@ -44,7 +44,7 @@
         <button type="submit">Login</button>
       </form>
 
-      
+      <p>Don't have an account? <a href="{{ url_for('register') }}">Register</a></p>
     </div>
   </body>
 </html>
