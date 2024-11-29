@@ -24,6 +24,20 @@ session = DBSession()
 login_manager = LoginManager()
 login_manager.init_app(app)
 
+def validate_password(password):
+    if len(password) < 8:
+        return "Password must be at least 8 characters long."
+    if not any(char.isupper() for char in password):
+        return "Password must contain at least one uppercase letter."
+    if not any(char.islower() for char in password):
+        return "Password must contain at least one lowercase letter."
+    if not any(char.isdigit() for char in password):
+        return "Password must contain at least one digit."
+    if not any(char in "!@#$%^&*()" for char in password):
+        return "Password must contain at least one special character (!@#$%^&*())."
+    return None
+
+
 @login_manager.unauthorized_handler
 def unauthorized():
     flash('You must be logged in to access this page.', 'error')
@@ -33,12 +47,74 @@ def unauthorized():
 def load_user(user_id):
     return session.query(User).get(user_id)
 
-#For Admins
+#For Approving new Admins
+@app.route('/admin/approve_users')
+@login_required
+def approve_users():
+    if current_user.role not in ['admin', 'owner']:
+        flash('You must be an admin to access this page.', 'error')
+        return redirect(url_for('home'))
 
+    # Query for users who are not approved yet
+    pending_users = db_session.query(User).filter_by(is_approved=False).all()
+    return render_template('approve_users.html', users=pending_users)
+
+
+@app.route('/admin/admin_dashboard/<int:user_id>/approve', methods=['POST','GET'])
+@login_required
+def approve_user(user_id):
+    if current_user.role not in ['admin', 'owner']:
+        flash('You must be an admin to approve users.', 'error')
+        return redirect(url_for('home'))
+
+    user_to_approve = db_session.query(User).filter_by(id=user_id).one_or_none()
+    if user_to_approve:
+        user_to_approve.is_approved = True
+        db_session.commit()
+        flash(f'User {user_to_approve.username} has been approved!', 'success')
+    else:
+        flash('User not found.', 'error')
+
+    return redirect(url_for('admin_dashboard'))
+
+
+@app.route('/admin/admin_dashboard/<int:user_id>/reject', methods=['POST','GET'])
+@login_required
+def reject_user(user_id):
+    if current_user.role not in ['admin', 'owner']:
+        flash('You must be an admin/owner to reject users.', 'error')
+        return redirect(url_for('home'))
+
+    user_to_reject = db_session.query(User).filter_by(id=user_id).one_or_none()
+    if user_to_reject:
+        user_to_reject.role = 'rejected'
+        db_session.commit()
+        flash(f'User {user_to_reject.username} has been rejected', 'info')
+    else:
+        flash('User not found.', 'error')
+
+    return redirect(url_for('admin_dashboard'))
+
+
+@app.route('/admin/dashboard')
+@login_required
+def admin_dashboard():
+    if current_user.role not in ['admin', 'owner']:
+        flash('You must be an admin/owner to access this page.', 'error')
+        return redirect(url_for('restaurants'))
+
+    users = db_session.query(User).all()
+    pending_users = db_session.query(User).filter_by(is_approved=False).all()
+    pending_users_count = len(pending_users)
+    
+    return render_template('admin_dashboard.html', users=users, pending_users_count=pending_users_count)
+
+
+# For Admins
 @app.route('/admin/')
 @login_required
 def admin():
-    restaurants = session.query(Restaurant).all()
+    restaurants = db_session.query(Restaurant).all() 
     return render_template('admin_restaurants.html', restaurants=restaurants)
 
 @app.route('/restaurants/new/', methods=['GET', 'POST'])
@@ -169,7 +245,6 @@ def login():
         password = request.form['password']
         
         captcha_answer = request.form['captcha']
-        # refresh_captcha = request.method=='GET'? True:False
 
         # Check CAPTCHA solution
         if captcha_answer != session.get('captcha_solution'):
@@ -205,6 +280,25 @@ def register():
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
+        error = validate_password(password)
+        if error:
+            flash(error)
+            return redirect('/register')
+        flash("Password is valid!")
+
+        captcha_answer = request.form['captcha']
+        # refresh_captcha = request.method=='GET'? True:False
+
+        # Check CAPTCHA solution
+        if captcha_answer != session.get('captcha_solution'):
+            flash('Incorrect CAPTCHA. Please try again.', 'error')
+            captcha_code = generate_captcha()  # Generate new CAPTCHA if answer is wrong
+            session['captcha_solution'] = captcha_code
+            return render_template('login.html', captcha=captcha_code)
+
+
+        # Clear CAPTCHA solution after successful validation
+        session.pop('captcha_solution', None)
 
         # Check if username already exists
         if session.query(User).filter_by(username=username).first():

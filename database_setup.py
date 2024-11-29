@@ -14,7 +14,8 @@ class User(Base, UserMixin):
     id = Column(Integer, primary_key=True)
     username = Column(String, nullable=False, unique=True)
     password = Column(String, nullable=False)
-    role = Column(String, nullable=False, default='user')  # Default role is 'user'
+    role = Column(String, nullable=False, default='user')
+    is_approved = Column(Boolean, default=False)
 
     def is_admin(self):
         return self.role == 'admin'
