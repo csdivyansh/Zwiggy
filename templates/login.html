@@ -59,6 +59,8 @@
       rel="stylesheet"
       href="{{ url_for('static', filename='register.css') }}"
     />
+      href="{{ url_for('static', filename='register.css') }}"
+    />
   </head>
   <body  onload="myFunction()" style="margin:0;">
     <div class="loader"></div>
@@ -75,6 +77,16 @@
       {% endif %} {% endwith %}
       <form action="{{ url_for('login') }}" method="POST">
         <input type="text" name="username" placeholder="Username" required />
+        <input type="password" name="password" placeholder="Password" required />
+
+        <!-- Custom CAPTCHA -->
+        <div class="captcha-container">
+          <div class="captcha">
+            <img id="captcha-image" src="{{ url_for('captcha_image') }}" alt="Captcha Image" />
+          </div>
+          <a href="#" id="refresh-captcha">Refresh</a>
+        </div>
+
         <input
           type="password"
           name="password"
@@ -83,26 +95,15 @@
         />
         <button type="submit">Login</button>
       </form>
-
-      <p>
-        Don't have an account?
-        <a href="{{ url_for('register') }}">Register here</a>
-      </p>
-      <img src="" alt="">
     </div>
 
     <script>
-      var myVar;
-      
-      function myFunction() {
-        myVar = setTimeout(showPage, 3000);
-      }
-      
-      function showPage() {
-        document.getElementById("loader").style.display = "none";
-        document.getElementById("myDiv").style.display = "block";
-      }
-      </script>
-
+      document.getElementById('refresh-captcha').addEventListener('click', function (event) {
+        event.preventDefault(); 
+        const captchaImage = document.getElementById('captcha-image');
+        const newCaptchaUrl = "{{ url_for('captcha_image') }}" + "?t=" + new Date().getTime();
+        captchaImage.src = newCaptchaUrl;
+      });
+    </script>
   </body>
 </html>
