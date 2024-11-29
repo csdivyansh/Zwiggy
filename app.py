@@ -6,7 +6,6 @@ from sqlalchemy.orm import sessionmaker
 from database_setup import Base, Restaurant, MenuItem, User
 import os
 import  io
-import redis
 from PIL import  Image, ImageDraw, ImageFont
 from flask import Response
 from sqlalchemy import or_
