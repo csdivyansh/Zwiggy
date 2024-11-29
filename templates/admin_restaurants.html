@@ -18,14 +18,16 @@
         Restaurants List
     </div>
     
-    <div>
-        {% with messages = get_flashed_messages() %}
-        {% if messages %}
-        {% for message in messages %}
-        <strong> {{ message }} </strong>
-        {% endfor %}
-        {% endif %}
-        {% endwith %}
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div class="flash-messages">
+      {% for category, message in messages %}
+      <p class="{{ category }}">{{ message }}</p>
+      {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
     </div>
     <br>
     <div class="admin_dashboard-button">

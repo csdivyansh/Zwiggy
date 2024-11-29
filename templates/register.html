@@ -24,12 +24,13 @@
         <form method="POST" action="{{ url_for('register') }}">
             <input type="text" name="username" placeholder="Enter your username" required>
             <input type="password" name="password" placeholder="Enter your password" required>
-            <div class="captcha-container">
-                <div class="captcha">{{ captcha }}</div>
-                <a href="{{ url_for('register', refresh_captcha=True) }}" id="refresh-captcha">Refresh</a>
-              
-                
-              </div>
+                <!-- Custom CAPTCHA -->
+                <div class="captcha-container">
+                    <div class="captcha">
+                      <img id="captcha-image" src="{{ url_for('captcha_image') }}" alt="Captcha Image" />
+                    </div>
+                    <a href="#" id="refresh-captcha">Refresh</a>
+                  </div>
               <input
                 type="text"
                 name="captcha"
@@ -43,5 +44,14 @@
 
         <p>Already have an account? <a href="{{ url_for('login') }}">Log in</a></p>
     </div>
+    <script>
+        document.getElementById('refresh-captcha').addEventListener('click', function (event) {
+          event.preventDefault(); 
+          const captchaImage = document.getElementById('captcha-image');
+          const newCaptchaUrl = "{{ url_for('captcha_image') }}" + "?t=" + new Date().getTime();
+          captchaImage.src = newCaptchaUrl; 
+        });
+      </script>
+        
 </body>
 </html>

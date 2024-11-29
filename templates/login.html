@@ -6,7 +6,8 @@
     <title>Admin Login</title>
     <link
       rel="stylesheet"
-      href="{{ url_for('static', filename='register.css') }}">
+      href="{{ url_for('static', filename='register.css') }}"
+    />
   </head>
   <body>
     <div class="register-container">
@@ -28,11 +29,12 @@
 
         <!-- Custom CAPTCHA -->
         <div class="captcha-container">
-          <div class="captcha">{{ captcha }}</div>
-          <a href="{{ url_for('login', refresh_captcha=True) }}" id="refresh-captcha">Refresh</a>
-        
-          
+          <div class="captcha">
+            <img id="captcha-image" src="{{ url_for('captcha_image') }}" alt="Captcha Image" />
+          </div>
+          <a href="#" id="refresh-captcha">Refresh</a>
         </div>
+
         <input
           type="text"
           name="captcha"
@@ -43,8 +45,15 @@
 
         <button type="submit">Login</button>
       </form>
-
-      
     </div>
+
+    <script>
+      document.getElementById('refresh-captcha').addEventListener('click', function (event) {
+        event.preventDefault(); 
+        const captchaImage = document.getElementById('captcha-image');
+        const newCaptchaUrl = "{{ url_for('captcha_image') }}" + "?t=" + new Date().getTime();
+        captchaImage.src = newCaptchaUrl;
+      });
+    </script>
   </body>
 </html>

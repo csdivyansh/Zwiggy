@@ -1,0 +1,13 @@
+<h1>Search Results for "{{ query }}"</h1>
+
+{% if results %}
+<ul>
+    {% for restaurant in results %}
+    <li>
+        <h2>{{ restaurant.name }}</h2>
+    </li>
+    {% endfor %}
+</ul>
+{% else %}
+<p>No results found for your search.</p>
+{% endif %}

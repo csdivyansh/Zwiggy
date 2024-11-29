@@ -21,6 +21,16 @@ class User(Base, UserMixin):
     def is_admin(self):
         return self.role == 'admin'
 
+class Customer(Base , UserMixin):
+    __tablename__ ='customer'
+
+    c_id = Column(Integer, primary_key=True)
+    username = Column(String, nullable=False, unique=True)
+    email = Column(String, nullable=False, unique=True)
+    password = Column(String, nullable=False)
+    membership = Column(String, nullable=False, default='regular')
+
+
 
 class Restaurant(Base):
     __tablename__ = 'restaurant'

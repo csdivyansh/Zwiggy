@@ -261,7 +261,46 @@ position: fixed;
   box-shadow: 0 3px 8px rgba(231, 76, 60, 0.3); /* Red shadow for pressed effect */
 }
 
+
+.login-button {
+  position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 999; 
+  display: inline-block;
+  margin: 8px 15px;
+  padding: 8px 10px;
+  font-size: 1rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  text-decoration: none; /* Remove underline */
+  border-radius: 10px; /* Less rounded */
+  background: rgba(255, 255, 255, 0.5); /* Transparent background */
+  color: #e74c3c; /* Red color text */
+  border: 1px solid rgba(231, 76, 60, 0.5); /* Smaller border */
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+.login-button a {
+  color: inherit; /* Inherit the color from parent */
+  text-decoration: none; /* Remove underline from link */
+  display: inline-block; /* Ensures proper padding and alignment */
+}
+
+.login-button:hover {
+  background: rgba(216, 10, 10, 0.5); /* Slightly more visible red background on hover */
+  border-color: rgba(231, 76, 60, 0.999); /* Darker red border on hover */
+  color: #fff; /* White text on hover */
+ 
+  transform: translateY(-3px); /* Lift the button on hover */
+}
+
+.login-button:active {
+  transform: translateY(2px); /* Button presses down on click */
+  box-shadow: 0 3px 8px rgba(231, 76, 60, 0.3); /* Red shadow for pressed effect */
+}
 /* Positioning the logout button */
+
 .top-buttons {
   position: absolute;
   top: 20px;

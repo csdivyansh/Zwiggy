@@ -7,7 +7,12 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from database_setup import Base, Restaurant, MenuItem, User
 import os
+import  io
 import redis
+from PIL import  Image, ImageDraw, ImageFont
+from flask import Response
+from sqlalchemy import or_
+
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.urandom(24)
@@ -118,6 +123,7 @@ def newRestaurant():
 @app.route('/admin/<int:restaurant_id>/delete/', methods=['POST'])
 @login_required
 def delete(restaurant_id):
+
     try:
         itemToDelete = db_session.query(Restaurant).filter_by(id=restaurant_id).one_or_none()  # Updated to use db_session
         if not itemToDelete:
@@ -131,6 +137,51 @@ def delete(restaurant_id):
         flash(f"An error occurred: {e}", 'error')
     return redirect(url_for('admin'))
 
+from PIL import Image, ImageDraw, ImageFont
+
+def generate_captcha_image(captcha_code):
+    # Create a blank image with white background
+    width, height = 120, 50
+    image = Image.new('RGB', (width, height), color='white')
+
+    # Initialize drawing context
+    draw = ImageDraw.Draw(image)
+
+
+    # Neon color for the text
+    neon_color = (0, 0, 255)  # Neon blue
+    glow_color = (255, 105, 180,80)  # Semi-transparent green for glow effect
+    glow_color2 = (0, 255, 0 , 80)
+    # Set font (you can customize the font)
+    try:
+        font = ImageFont.truetype("arial.ttf", 36)
+    except IOError:
+        font = ImageFont.load_default()
+
+    # Calculate the text size using textbbox (recommended method in Pillow 8.0+)
+    text_bbox = draw.textbbox((0, 0), captcha_code, font=font)
+    text_width = text_bbox[2] - text_bbox[0]
+    text_height = text_bbox[3] - text_bbox[1]
+
+    # Calculate position to center the text
+    position = ((width - text_width) // 2, (height - text_height) // 2)
+
+    # Add the CAPTCHA text to the image
+     # Create a glowing effect by drawing shadows
+    for offset in range(3, 0, -1):  # Draw shadow around the text
+        draw.text((position[0] + offset, position[1] + offset), captcha_code, fill=glow_color, font=font)
+    # for offset in range(4, 0, -1):  # Draw shadow around the text
+    #     draw.text((position[0] + offset, position[1] + offset), captcha_code, fill=glow_color2, font=font)
+
+    # Now draw the actual text on top
+    draw.text(position, captcha_code, fill=neon_color, font=font)
+    # Optionally, you can add random noise or lines for additional security
+
+    # Return the image
+    return image
+
+
+    
 def generate_captcha(length=4, use_digits=True, use_letters=True, use_both=True):
     # Define possible characters for CAPTCHA
     if use_both:
@@ -147,14 +198,38 @@ def generate_captcha(length=4, use_digits=True, use_letters=True, use_both=True)
     
     return captcha_code.upper()
 
+@app.route('/captcha_image/')
+def captcha_image():
+    captcha_code = generate_captcha()
+    
+    # Save the CAPTCHA text to session
+    session['captcha_solution'] = captcha_code
+    
+    # Generate CAPTCHA image
+    image = generate_captcha_image(captcha_code)
+    
+    # Convert the image to a byte stream
+    img_io = io.BytesIO()
+    image.save(img_io, 'PNG')
+    img_io.seek(0)
+    
+    # Return the image as a response with the correct content type
+    return Response(img_io, mimetype='image/png')
+
+@app.route('/refresh_captcha', methods=['GET'])
+def refresh_captcha():
+    captcha_code = generate_captcha()
+    session['captcha_solution'] = captcha_code  # Store the new solution in the session
+    # Return the new CAPTCHA code or image URL (adjust based on your implementation)
+    return render_template('login.html', captcha=captcha_code)
 
 
 @app.route('/login/', methods=['GET', 'POST'])
 def login():
     
-    if 'captcha_solution' not in session or request.args.get('refresh_captcha'):
-        captcha_code = generate_captcha()
-        session['captcha_solution'] = captcha_code
+    # if 'captcha_solution' not in session or request.args.get('refresh_captcha'):
+    #     captcha_code = generate_captcha()
+    #     session['captcha_solution'] = captcha_code
 
     if request.method == 'POST':
     
@@ -162,7 +237,6 @@ def login():
         password = request.form['password']
         
         captcha_answer = request.form['captcha']
-        # refresh_captcha = request.method=='GET'? True:False
 
         # Check CAPTCHA solution
         if captcha_answer != session.get('captcha_solution'):
@@ -307,10 +381,74 @@ def deleteMenuItem(restaurant_id, menu_id):
 def home():
     return render_template('index.html')
 
+@app.route('/user_login/', methods=['GET', 'POST'])
+def user_login():
+    
+    if 'captcha_solution' not in session or request.args.get('refresh_captcha'):
+        captcha_code = generate_captcha()
+        session['captcha_solution'] = captcha_code
+
+    if request.method == 'POST':
+    
+        username = request.form['username']
+        password = request.form['password']
+        
+        captcha_answer = request.form['captcha']
+
+        # Check CAPTCHA solution
+        if captcha_answer != session.get('captcha_solution'):
+            flash('Invalid CAPTCHA ! Please try again.', 'error')
+            captcha_code = generate_captcha()  # Generate new CAPTCHA if answer is wrong
+            session['captcha_solution'] = captcha_code
+            return render_template('login.html', captcha=captcha_code)
+
+
+        # Clear CAPTCHA solution after successful validation
+        session.pop('captcha_solution', None)
+
+        # Validate username and password
+        user = db_session.query(User).filter_by(username=username).first()
+        if user and check_password_hash(user.password, password):
+            
+            login_user(user)
+            flash(f'Welcome {username}!', 'success')
+            return redirect(url_for('restaurants'))
+        else:
+            flash('Invalid username or password', 'error')
+
+    captcha_code = session.get('captcha_solution', None)
+    return render_template('user_login.html', captcha=captcha_code)
+
+
+
+
+
 @app.route('/restaurants/')
 def restaurants():
     restaurants = db_session.query(Restaurant).all()  # Updated to use db_session
     return render_template('restaurants.html', restaurants=restaurants)
+
+
+@app.route('/search', methods=['GET'])
+def search_restaurant():
+    query = request.args.get('query', '').strip()  # Get the search term
+    
+    if query:
+        # Search logic
+        results = (
+            db_session.query(Restaurant)
+            .filter(Restaurant.name.ilike(f"%{query}%"))
+            .all()
+        )
+        if not results:
+            flash("No results were Found !",'error')
+            return redirect(url_for('restaurants'))
+    else:
+        # Show all restaurants if no query
+        results = db_session.query(Restaurant).all()
+
+    # Pass the query and results to the template
+    return render_template('restaurants.html', query=query, restaurants=results)
 
 @app.route('/restaurants/JSON/')
 def restaurantsJSON():
