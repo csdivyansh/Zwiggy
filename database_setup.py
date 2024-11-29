@@ -1,10 +1,6 @@
 import sys
 import os
-<<<<<<< HEAD
 from sqlalchemy import Column, ForeignKey, Integer, String,Boolean
-=======
-from sqlalchemy import Column, ForeignKey, Integer, String, Boolean
->>>>>>> df168f1b5763a3ad380775cca64d8c1046672ff5
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 from sqlalchemy import create_engine
