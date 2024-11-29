@@ -1,14 +1,16 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
+from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, session
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from database_setup import Base, Restaurant, MenuItem, User
 import os
-import  io
+import io
 from PIL import  Image, ImageDraw, ImageFont
 from flask import Response
 from sqlalchemy import or_
+import string
+import random
 
 
 app = Flask(__name__)
@@ -17,8 +19,7 @@ app.config['SECRET_KEY'] = os.urandom(24)
 # Database setup
 engine = create_engine('sqlite:///restaurantmenu.db')
 Base.metadata.bind = engine
-DBSession = sessionmaker(bind=engine)
-session = DBSession()
+db_session = sessionmaker(bind=engine)
 
 # Flask-Login setup
 login_manager = LoginManager()
@@ -45,7 +46,7 @@ def unauthorized():
 
 @login_manager.user_loader
 def load_user(user_id):
-    return session.query(User).get(user_id)
+    return db_session.query(User).get(user_id)
 
 #For Approving new Admins
 @app.route('/admin/approve_users')
@@ -123,8 +124,8 @@ def newRestaurant():
     if request.method == 'POST':
         name = request.form.get('name')
         restaurant1 = Restaurant(name=name)
-        session.add(restaurant1)
-        session.commit()
+        db_session.add(restaurant1)
+        db_session.commit()
         return redirect(url_for('admin'))
 
     return render_template('newrestaurant.html')
@@ -134,13 +135,13 @@ def newRestaurant():
 def delete(restaurant_id):
 
     try:
-        itemToDelete = session.query(Restaurant).filter_by(id=restaurant_id).one_or_none()
+        itemToDelete = db_session.query(Restaurant).filter_by(id=restaurant_id).one_or_none()
         if not itemToDelete:
             flash("Restaurant not found.", 'error')
             return redirect(url_for('admin'))
 
-        session.delete(itemToDelete)
-        session.commit()
+        db_session.delete(itemToDelete)
+        db_session.commit()
         flash("Restaurant Deleted!", 'success')
     except Exception as e:
         flash(f"An error occurred: {e}", 'error')
@@ -477,3 +478,6 @@ def restaurantMenuJSON(restaurant_id):
     restaurant = session.query(Restaurant).filter_by(id=restaurant_id).one()
     items = session.query(MenuItem).filter_by(restaurant_id=restaurant.id).all()
     return jsonify(MenuItems = [i.serialize for i in items])
+
+if __name__ == '__main__':
+    app.run(debug=True, host = '0.0.0.0', port = 8085)
