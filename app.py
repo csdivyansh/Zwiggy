@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for, flash, jso
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, scoped_session
 from database_setup import Base, Restaurant, MenuItem, User
 import os
 import io
@@ -19,7 +19,9 @@ app.config['SECRET_KEY'] = os.urandom(24)
 # Database setup
 engine = create_engine('sqlite:///restaurantmenu.db')
 Base.metadata.bind = engine
-db_session = sessionmaker(bind=engine)
+# Use a scoped SQLAlchemy session and name it `db` to avoid colliding with Flask's `session`
+DBSession = scoped_session(sessionmaker(bind=engine))
+db = DBSession()
 
 # Flask-Login setup
 login_manager = LoginManager()
@@ -46,7 +48,7 @@ def unauthorized():
 
 @login_manager.user_loader
 def load_user(user_id):
-    return db_session.query(User).get(user_id)
+    return db.query(User).get(user_id)
 
 #For Approving new Admins
 @app.route('/admin/approve_users')
@@ -57,7 +59,7 @@ def approve_users():
         return redirect(url_for('home'))
 
     # Query for users who are not approved yet
-    pending_users = db_session.query(User).filter_by(is_approved=False).all()
+    pending_users = db.query(User).filter_by(is_approved=False).all()
     return render_template('approve_users.html', users=pending_users)
 
 
@@ -68,10 +70,10 @@ def approve_user(user_id):
         flash('You must be an admin to approve users.', 'error')
         return redirect(url_for('home'))
 
-    user_to_approve = db_session.query(User).filter_by(id=user_id).one_or_none()
+    user_to_approve = db.query(User).filter_by(id=user_id).one_or_none()
     if user_to_approve:
         user_to_approve.is_approved = True
-        db_session.commit()
+        db.commit()
         flash(f'User {user_to_approve.username} has been approved!', 'success')
     else:
         flash('User not found.', 'error')
@@ -86,10 +88,10 @@ def reject_user(user_id):
         flash('You must be an admin/owner to reject users.', 'error')
         return redirect(url_for('home'))
 
-    user_to_reject = db_session.query(User).filter_by(id=user_id).one_or_none()
+    user_to_reject = db.query(User).filter_by(id=user_id).one_or_none()
     if user_to_reject:
         user_to_reject.role = 'rejected'
-        db_session.commit()
+        db.commit()
         flash(f'User {user_to_reject.username} has been rejected', 'info')
     else:
         flash('User not found.', 'error')
@@ -104,8 +106,8 @@ def admin_dashboard():
         flash('You must be an admin/owner to access this page.', 'error')
         return redirect(url_for('restaurants'))
 
-    users = db_session.query(User).all()
-    pending_users = db_session.query(User).filter_by(is_approved=False).all()
+    users = db.query(User).all()
+    pending_users = db.query(User).filter_by(is_approved=False).all()
     pending_users_count = len(pending_users)
     
     return render_template('admin_dashboard.html', users=users, pending_users_count=pending_users_count)
@@ -115,7 +117,7 @@ def admin_dashboard():
 @app.route('/admin/')
 @login_required
 def admin():
-    restaurants = db_session.query(Restaurant).all() 
+    restaurants = db.query(Restaurant).all() 
     return render_template('admin_restaurants.html', restaurants=restaurants)
 
 @app.route('/restaurants/new/', methods=['GET', 'POST'])
@@ -124,8 +126,8 @@ def newRestaurant():
     if request.method == 'POST':
         name = request.form.get('name')
         restaurant1 = Restaurant(name=name)
-        db_session.add(restaurant1)
-        db_session.commit()
+        db.add(restaurant1)
+        db.commit()
         return redirect(url_for('admin'))
 
     return render_template('newrestaurant.html')
@@ -135,13 +137,13 @@ def newRestaurant():
 def delete(restaurant_id):
 
     try:
-        itemToDelete = db_session.query(Restaurant).filter_by(id=restaurant_id).one_or_none()
+        itemToDelete = db.query(Restaurant).filter_by(id=restaurant_id).one_or_none()
         if not itemToDelete:
             flash("Restaurant not found.", 'error')
             return redirect(url_for('admin'))
 
-        db_session.delete(itemToDelete)
-        db_session.commit()
+        db.delete(itemToDelete)
+        db.commit()
         flash("Restaurant Deleted!", 'success')
     except Exception as e:
         flash(f"An error occurred: {e}", 'error')
@@ -259,7 +261,7 @@ def login():
         session.pop('captcha_solution', None)
 
         # Validate username and password
-        user = db_session.query(User).filter_by(username=username).first()
+        user = db.query(User).filter_by(username=username).first()
         if user and check_password_hash(user.password, password):
             login_user(user)
             flash('Login successful!', 'success')
@@ -302,7 +304,7 @@ def register():
         session.pop('captcha_solution', None)
 
         # Check if username already exists
-        if session.query(User).filter_by(username=username).first():
+        if db.query(User).filter_by(username=username).first():
             flash('Username already exists!', 'error')
             return redirect(url_for('register'))
 
@@ -310,8 +312,8 @@ def register():
         hashed_password = generate_password_hash(password)
 
         new_user = User(username=username, password=hashed_password, role='user')
-        session.add(new_user)
-        session.commit()
+        db.add(new_user)
+        db.commit()
 
         flash('Registration successful! You can now log in.', 'success')
         return redirect(url_for('login'))
@@ -322,7 +324,7 @@ def register():
 @app.route('/admin/<int:restaurant_id>/menu/new/', methods=['GET', 'POST'])
 @login_required
 def newMenuItem(restaurant_id):
-    restaurant = session.query(Restaurant).filter_by(id=restaurant_id).one()
+    restaurant = db.query(Restaurant).filter_by(id=restaurant_id).one()
 
     if request.method == 'POST':
         name = request.form.get('name')
@@ -347,8 +349,8 @@ def newMenuItem(restaurant_id):
         )
 
         # Add to session and commit to the database
-        session.add(new_item)
-        session.commit()
+        db.add(new_item)
+        db.commit()
         flash('New menu item added successfully!', 'success')
         return redirect(url_for('restaurantMenu', restaurant_id=restaurant.id))
 
@@ -358,12 +360,12 @@ def newMenuItem(restaurant_id):
 @app.route('/admin/<int:restaurant_id>/<int:menu_id>/edit', methods=['GET', 'POST'])
 @login_required
 def editMenuItem(restaurant_id, menu_id):    
-    editedItem = session.query(MenuItem).filter_by(id=menu_id).one()
+    editedItem = db.query(MenuItem).filter_by(id=menu_id).one()
     if request.method == 'POST':
         if request.form['name']:
             editedItem.name = request.form['name']
-        session.add(editedItem)
-        session.commit()
+        db.add(editedItem)
+        db.commit()
         flash('Menu item edited successfully!', 'success')
         return redirect(url_for('restaurantMenu', restaurant_id=restaurant_id))
     else:
@@ -372,10 +374,10 @@ def editMenuItem(restaurant_id, menu_id):
 @app.route('/admin/<int:restaurant_id>/<int:menu_id>/delete', methods=['GET', 'POST'])
 @login_required
 def deleteMenuItem(restaurant_id, menu_id):
-    itemToDelete = session.query(MenuItem).filter_by(id=menu_id).one()
+    itemToDelete = db.query(MenuItem).filter_by(id=menu_id).one()
     if request.method == 'POST':
-        session.delete(itemToDelete)
-        session.commit()
+        db.delete(itemToDelete)
+        db.commit()
         flash("Item Deleted!", 'success')
         return redirect(url_for('restaurantMenu', restaurant_id=restaurant_id))
     else:
@@ -413,7 +415,7 @@ def user_login():
         session.pop('captcha_solution', None)
 
         # Validate username and password
-        user = db_session.query(User).filter_by(username=username).first()
+        user = db.query(User).filter_by(username=username).first()
         if user and check_password_hash(user.password, password):
             
             login_user(user)
@@ -431,7 +433,7 @@ def user_login():
 
 @app.route('/restaurants/')
 def restaurants():
-    restaurants = session.query(Restaurant).all()
+    restaurants = db.query(Restaurant).all()
     return render_template('restaurants.html', restaurants=restaurants)
 
 
@@ -442,7 +444,7 @@ def search_restaurant():
     if query:
         # Search logic
         results = (
-            db_session.query(Restaurant)
+            db.query(Restaurant)
             .filter(Restaurant.name.ilike(f"%{query}%"))
             .all()
         )
@@ -451,33 +453,33 @@ def search_restaurant():
             return redirect(url_for('restaurants'))
     else:
         # Show all restaurants if no query
-        results = db_session.query(Restaurant).all()
+        results = db.query(Restaurant).all()
 
     # Pass the query and results to the template
     return render_template('restaurants.html', query=query, restaurants=results)
 
 @app.route('/restaurants/JSON/')
 def restaurantsJSON():
-    restaurants = session.query(Restaurant).all()
+    restaurants = db.query(Restaurant).all()
     return jsonify(RestaurantNames = [i.serialize() for i in restaurants])
 
 @app.route('/restaurants/<int:restaurant_id>/')
 def UserMenu(restaurant_id):
-    restaurant = session.query(Restaurant).filter_by(id=restaurant_id).one()
-    items = session.query(MenuItem).filter_by(restaurant_id=restaurant.id).all()
+    restaurant = db.query(Restaurant).filter_by(id=restaurant_id).one()
+    items = db.query(MenuItem).filter_by(restaurant_id=restaurant.id).all()
     return render_template('user_menu.html', restaurant=restaurant, items=items)
 
 @app.route('/restaurants/<int:restaurant_id>/usermenu/')
 def restaurantMenu(restaurant_id):
-    restaurant = session.query(Restaurant).filter_by(id=restaurant_id).one()
-    items = session.query(MenuItem).filter_by(restaurant_id=restaurant.id).all()
+    restaurant = db.query(Restaurant).filter_by(id=restaurant_id).one()
+    items = db.query(MenuItem).filter_by(restaurant_id=restaurant.id).all()
     return render_template('menu.html', restaurant=restaurant, items=items)
 
 @app.route('/restaurants/<int:restaurant_id>/JSON')
 def restaurantMenuJSON(restaurant_id):
-    restaurant = session.query(Restaurant).filter_by(id=restaurant_id).one()
-    items = session.query(MenuItem).filter_by(restaurant_id=restaurant.id).all()
-    return jsonify(MenuItems = [i.serialize for i in items])
+    restaurant = db.query(Restaurant).filter_by(id=restaurant_id).one()
+    items = db.query(MenuItem).filter_by(restaurant_id=restaurant.id).all()
+    return jsonify(MenuItems = [i.serialize() for i in items])
 
 if __name__ == '__main__':
     app.run(debug=True, host = '0.0.0.0', port = 8085)
