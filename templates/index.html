@@ -1,29 +1,10 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Zwiggy</title>
-    <link
-      rel="stylesheet"
-      href="{{ url_for('static', filename='home.css') }}"
-    />
-  </head>
-  <body>
-    <div class="hero">
-      <h1>Welcome to Zwiggy</h1>
-      <p>Experience the finest dining with us.</p>
-      <a href="http://localhost:8085/restaurants/" class="cta"
-        >View Restaurant Lists</a
-      >
-    </div>
-
-    <!-- Top-right corner buttons -->
-    <div class="top-buttons">
-      <a href="http://localhost:8085/login/" class="cta-login"> Login </a>
-      <a href="http://localhost:8085/register/" class="cta-register">
-        Join Us
-      </a>
-    </div>
-  </body>
-</html>
+{% extends 'base.html' %} {% block title %}Home - Zwiggy{% endblock %} {% block
+content %}
+<div class="p-5 rounded bg-primary text-white text-center">
+  <h1 class="display-5">Welcome to Zwiggy</h1>
+  <p class="lead">Experience the finest dining with us.</p>
+  <a href="{{ url_for('restaurants') }}" class="btn btn-light btn-lg"
+    >View Restaurant Lists</a
+  >
+</div>
+{% endblock %}

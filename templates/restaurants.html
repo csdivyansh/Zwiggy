@@ -1,57 +1,28 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends 'base.html' %} {% block title %}Restaurants - Zwiggy{% endblock %} {%
+block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h2>Restaurants</h2>
+  <form class="d-flex" method="GET" action="{{ url_for('search_restaurant') }}">
+    <input
+      class="form-control me-2"
+      type="search"
+      name="query"
+      placeholder="Search restaurants..."
+      value="{{ query }}"
+    />
+    <button class="btn btn-outline-secondary" type="submit">Search</button>
+  </form>
+</div>
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Restaurants</title>
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='restaurant.css') }}">
-</head>
-
-<body>
-    <!-- Header with login and register buttons -->
-    <div class="header">
-        <div class="res_header">Restaurants List</div>
-
-        <!-- Login and Register buttons -->
-        <div class="login-button">
-            <a href="http://localhost:8085/user_login/" class="login - button">
-             
-              Login /
-            </a>
-            <a href="http://localhost:8085/user_register/" class="cta-register">
-            
-              Register
-            </a>
-          </div>
-
-    <!-- Search Form -->
-    <form method="GET" action="{{ url_for('search_restaurant') }}" class="search-form">
-        <input type="text" name="query" placeholder="Search restaurants..." value="{{ query }}">
-        <button type="submit">Search</button>
-    </form>
-
-    <!-- Flash Messages -->
-    {% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-    <div class="flash-messages">
-        {% for category, message in messages %}
-        <p class="{{ category }}">{{ message }}</p>
-        {% endfor %}
-    </div>
-    {% endif %}
-    {% endwith %}
-
-    <!-- Restaurant List -->
-    <div class="restaurants-container">
-        {% if restaurants %}
-        {% for i in restaurants %}
-        <div class="restaurant-item">
-            <a href="{{ url_for('UserMenu', restaurant_id=i.id) }}">{{ i.name }}</a>
-        </div>
-        {% endfor %}
-        {% endif %}
-    </div>
-</body>
-
-</html>
+<div class="list-group">
+  {% if restaurants %} {% for r in restaurants %}
+  <a
+    class="list-group-item list-group-item-action"
+    href="{{ url_for('UserMenu', restaurant_id=r.id) }}"
+    >{{ r.name }}</a
+  >
+  {% endfor %} {% else %}
+  <div class="alert alert-warning">No restaurants found.</div>
+  {% endif %}
+</div>
+{% endblock %}
