@@ -1,10 +1,166 @@
-{% extends 'base.html' %} {% block title %}Home - Zwiggy{% endblock %} {% block
-content %}
-<div class="p-5 rounded bg-primary text-white text-center">
-  <h1 class="display-5">Welcome to Zwiggy</h1>
-  <p class="lead">Experience the finest dining with us.</p>
-  <a href="{{ url_for('restaurants') }}" class="btn btn-light btn-lg"
-    >View Restaurant Lists</a
-  >
-</div>
+{% extends "base.html" %} {% block title %}Zwiggy - Order Food Online | Home{%
+endblock %} {% block content %}
+<!-- Hero Section -->
+<section class="hero">
+  <div class="container">
+    <div class="hero-content">
+      <h1>Your favorite food, delivered fast</h1>
+      <p>
+        Order from thousands of restaurants and get it delivered to your
+        doorstep in minutes
+      </p>
+      <a href="{{ url_for('restaurants') }}" class="btn btn-primary btn-large"
+        >Start Ordering</a
+      >
+    </div>
+  </div>
+</section>
+
+<!-- Features Section -->
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">Why Choose Zwiggy?</h2>
+
+    <div class="grid grid-3">
+      <!-- Feature 1 -->
+      <div class="card">
+        <div class="card-body text-center">
+          <div style="font-size: 3rem; margin-bottom: 1rem">⚡</div>
+          <h3>Lightning Fast</h3>
+          <p>Get your food delivered in 30 minutes or less</p>
+        </div>
+      </div>
+
+      <!-- Feature 2 -->
+      <div class="card">
+        <div class="card-body text-center">
+          <div style="font-size: 3rem; margin-bottom: 1rem">👨‍🍳</div>
+          <h3>Best Restaurants</h3>
+          <p>Order from the best restaurants in your city</p>
+        </div>
+      </div>
+
+      <!-- Feature 3 -->
+      <div class="card">
+        <div class="card-body text-center">
+          <div style="font-size: 3rem; margin-bottom: 1rem">💰</div>
+          <h3>Great Deals</h3>
+          <p>Enjoy amazing discounts and offers every day</p>
+        </div>
+      </div>
+
+      <!-- Feature 4 -->
+      <div class="card">
+        <div class="card-body text-center">
+          <div style="font-size: 3rem; margin-bottom: 1rem">🔒</div>
+          <h3>100% Safe</h3>
+          <p>Secure payments and trackable deliveries</p>
+        </div>
+      </div>
+
+      <!-- Feature 5 -->
+      <div class="card">
+        <div class="card-body text-center">
+          <div style="font-size: 3rem; margin-bottom: 1rem">📱</div>
+          <h3>Easy to Use</h3>
+          <p>Simple interface, quick checkout</p>
+        </div>
+      </div>
+
+      <!-- Feature 6 -->
+      <div class="card">
+        <div class="card-body text-center">
+          <div style="font-size: 3rem; margin-bottom: 1rem">🌟</div>
+          <h3>24/7 Support</h3>
+          <p>Customer support available round the clock</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- How It Works Section -->
+<section class="section" style="background: var(--bg-light)">
+  <div class="container">
+    <h2 class="section-title">How It Works</h2>
+
+    <div class="grid grid-4">
+      <div class="card text-center">
+        <div class="card-body">
+          <div style="font-size: 2.5rem; margin-bottom: 1rem">1️⃣</div>
+          <h4>Browse Restaurants</h4>
+          <p>Explore hundreds of restaurants in your area</p>
+        </div>
+      </div>
+
+      <div class="card text-center">
+        <div class="card-body">
+          <div style="font-size: 2.5rem; margin-bottom: 1rem">2️⃣</div>
+          <h4>Choose Your Meal</h4>
+          <p>Pick from delicious menu items</p>
+        </div>
+      </div>
+
+      <div class="card text-center">
+        <div class="card-body">
+          <div style="font-size: 2.5rem; margin-bottom: 1rem">3️⃣</div>
+          <h4>Checkout Easily</h4>
+          <p>Fast and secure payment options</p>
+        </div>
+      </div>
+
+      <div class="card text-center">
+        <div class="card-body">
+          <div style="font-size: 2.5rem; margin-bottom: 1rem">4️⃣</div>
+          <h4>Enjoy Delivery</h4>
+          <p>Track your order in real-time</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA Section -->
+<section
+  class="section"
+  style="
+    background: linear-gradient(
+      135deg,
+      var(--primary-color) 0%,
+      var(--primary-dark) 100%
+    );
+    color: white;
+    text-align: center;
+  "
+>
+  <div class="container">
+    <h2 style="color: white; font-size: 2rem; margin-bottom: 1rem">
+      Ready to eat something delicious?
+    </h2>
+    <p
+      style="
+        color: rgba(255, 255, 255, 0.9);
+        font-size: 1.1rem;
+        margin-bottom: 2rem;
+      "
+    >
+      Join millions of customers ordering food every day
+    </p>
+    {% if not current_user.is_authenticated %}
+    <a
+      href="{{ url_for('register') }}"
+      class="btn btn-outline"
+      style="border-color: white; color: white"
+      >Register Now</a
+    >
+    {% else %}
+    <a
+      href="{{ url_for('restaurants') }}"
+      class="btn btn-outline"
+      style="border-color: white; color: white"
+      >Order Now</a
+    >
+    {% endif %}
+  </div>
+</section>
 {% endblock %}

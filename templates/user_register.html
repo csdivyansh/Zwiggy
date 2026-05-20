@@ -1,47 +1,124 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Register</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='register.css') }}">
-</head>
-<body>
-    <div class="register-container">
-        <h1>Create an Account</h1>
-
-        <!-- Flash Messages -->
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                <div class="flash-messages">
-                    {% for category, message in messages %}
-                        <p class="{{ category }}">{{ message }}</p>
-                    {% endfor %}
-                </div>
-            {% endif %}
-        {% endwith %}
+{% extends 'base.html' %} {% block title %}Customer Register - Zwiggy{% endblock
+%} {% block content %}
+<section
+  class="section"
+  style="
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 70vh;
+  "
+>
+  <div class="container" style="max-width: 450px">
+    <div class="card">
+      <div class="card-body p-4">
+        <div class="text-center mb-4">
+          <div style="font-size: 3rem; margin-bottom: 1rem">🚀</div>
+          <h2>Create Account</h2>
+          <p style="color: var(--text-secondary)">
+            Join Zwiggy and start ordering
+          </p>
+        </div>
 
         <form method="POST" action="{{ url_for('register') }}">
-            <input type="text" name="username" placeholder="Enter your username" required>
-            <input type="password" name="password" placeholder="Enter your password" required>
-            <!-- Custom CAPTCHA -->
-        <div class="captcha-container">
-            <div class="captcha"><img src="{{ url_for('captcha_image') }}" alt="Captcha Image" /></div>
-            <a href="{{ url_for('register', refresh_captcha=True) }}" id="refresh-captcha">Refresh</a>
-                
-              </div>
-              <input
-                type="text"
-                name="captcha"
-                placeholder="Enter the CAPTCHA text"
-                class="captcha-input"
-                required
-              />
-            <button type="submit">Register</button>
-        </form>
-          
+          <div class="form-group">
+            <label>Username</label>
+            <input
+              class="form-control"
+              type="text"
+              name="username"
+              placeholder="Choose a username"
+              required
+            />
+          </div>
 
-        <p>Already have an account? <a href="{{ url_for('user_login') }}">Log in</a></p>
+          <div class="form-group">
+            <label>Password</label>
+            <input
+              class="form-control"
+              type="password"
+              name="password"
+              placeholder="Create a strong password"
+              required
+            />
+            <small
+              style="
+                color: var(--text-light);
+                display: block;
+                margin-top: 0.5rem;
+              "
+              >Password must contain uppercase, lowercase, digit, and special
+              character</small
+            >
+          </div>
+
+          <div class="form-group">
+            <label>CAPTCHA</label>
+            <div
+              class="flex-between"
+              style="
+                margin-bottom: 1rem;
+                background: var(--bg-light);
+                padding: 1rem;
+                border-radius: 0.5rem;
+              "
+            >
+              <img
+                id="captcha-image"
+                src="{{ url_for('captcha_image') }}"
+                alt="Captcha"
+                style="height: 60px; width: 150px"
+              />
+              <button
+                type="button"
+                class="btn btn-outline btn-small"
+                id="refresh-captcha"
+              >
+                🔄
+              </button>
+            </div>
+            <input
+              class="form-control"
+              type="text"
+              name="captcha"
+              placeholder="Enter the CAPTCHA text"
+              required
+            />
+          </div>
+
+          <button class="btn btn-primary btn-block mt-3" type="submit">
+            Create Account
+          </button>
+        </form>
+
+        <div
+          style="
+            text-align: center;
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border-color);
+          "
+        >
+          <p style="margin: 0; color: var(--text-secondary)">
+            Already have an account?
+            <a href="{{ url_for('user_login') }}" style="font-weight: 600"
+              >Login here</a
+            >
+          </p>
+        </div>
+      </div>
     </div>
-</body>
-</html>
+  </div>
+</section>
+
+{% block extra_js %}
+<script>
+  document
+    .getElementById("refresh-captcha")
+    .addEventListener("click", function (e) {
+      e.preventDefault();
+      const img = document.getElementById("captcha-image");
+      img.src = "{{ url_for('captcha_image') }}" + "?t=" + Date.now();
+    });
+</script>
+{% endblock %} {% endblock %}

@@ -1,50 +1,115 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Customer Login</title>
-    <link
-      rel="stylesheet"
-      href="{{ url_for('static', filename='register.css') }}">
-  </head>
-  <body>
-    <div class="register-container">
-      <h1>Customer Login</h1>
-      <!-- Flash Messages -->
-      {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-      <div class="flash-messages">
-        {% for category, message in messages %}
-        <p class="{{ category }}">{{ message }}</p>
-        {% endfor %}
-      </div>
-      {% endif %}
-      {% endwith %}
-
-      <form action="{{ url_for('user_login') }}" method="POST">
-        <input type="text" name="username" placeholder="Username" required />
-        <input type="password" name="password" placeholder="Password" required />
-
-        <!-- Custom CAPTCHA -->
-        <div class="captcha-container">
-          <div class="captcha"><img src="{{ url_for('captcha_image') }}" alt="Captcha Image" /></div>
-          <a href="{{ url_for('user_login', refresh_captcha=True) }}" id="refresh-captcha">Refresh</a>
-        
-          
+{% extends 'base.html' %} {% block title %}Customer Login - Zwiggy{% endblock %}
+{% block content %}
+<section
+  class="section"
+  style="
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 70vh;
+  "
+>
+  <div class="container" style="max-width: 450px">
+    <div class="card">
+      <div class="card-body p-4">
+        <div class="text-center mb-4">
+          <div style="font-size: 3rem; margin-bottom: 1rem">🍔</div>
+          <h2>Customer Login</h2>
+          <p style="color: var(--text-secondary)">
+            Enter your credentials to continue
+          </p>
         </div>
-        <input
-          type="text"
-          name="captcha"
-          placeholder="Enter the CAPTCHA text"
-          class="captcha-input"
-          required
-        />
 
-        <button type="submit">Login</button>
-      </form>
+        <form action="{{ url_for('user_login') }}" method="POST">
+          <div class="form-group">
+            <label>Username</label>
+            <input
+              class="form-control"
+              type="text"
+              name="username"
+              placeholder="Enter your username"
+              required
+            />
+          </div>
 
-      
+          <div class="form-group">
+            <label>Password</label>
+            <input
+              class="form-control"
+              type="password"
+              name="password"
+              placeholder="Enter your password"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label>CAPTCHA</label>
+            <div
+              class="flex-between"
+              style="
+                margin-bottom: 1rem;
+                background: var(--bg-light);
+                padding: 1rem;
+                border-radius: 0.5rem;
+              "
+            >
+              <img
+                id="captcha-image"
+                src="{{ url_for('captcha_image') }}"
+                alt="Captcha"
+                style="height: 60px; width: 150px"
+              />
+              <button
+                type="button"
+                class="btn btn-outline btn-small"
+                id="refresh-captcha"
+              >
+                🔄
+              </button>
+            </div>
+            <input
+              class="form-control"
+              type="text"
+              name="captcha"
+              placeholder="Enter the CAPTCHA text"
+              required
+            />
+          </div>
+
+          <button class="btn btn-primary btn-block mt-3" type="submit">
+            Login
+          </button>
+        </form>
+
+        <div
+          style="
+            text-align: center;
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border-color);
+          "
+        >
+          <p style="margin: 0; color: var(--text-secondary)">
+            Don't have an account?
+            <a href="{{ url_for('register') }}" style="font-weight: 600"
+              >Register here</a
+            >
+          </p>
+        </div>
+      </div>
     </div>
-  </body>
-</html>
+  </div>
+</section>
+
+{% block extra_js %}
+<script>
+  document
+    .getElementById("refresh-captcha")
+    .addEventListener("click", function (e) {
+      e.preventDefault();
+      const img = document.getElementById("captcha-image");
+      img.src = "{{ url_for('captcha_image') }}" + "?t=" + Date.now();
+    });
+</script>
+{% endblock %} {% endblock %}

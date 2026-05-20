@@ -1,13 +1,67 @@
-<h1>Search Results for "{{ query }}"</h1>
+{% extends 'base.html' %} {% block title %}Search Results - Zwiggy{% endblock %}
+{% block content %}
+<section class="section">
+  <div class="container">
+    <h1 style="margin-bottom: 0.5rem">Search Results</h1>
+    <p style="color: var(--text-secondary); margin-bottom: 2rem">
+      Found results for "<strong>{{ query }}</strong>"
+    </p>
 
-{% if results %}
-<ul>
-    {% for restaurant in results %}
-    <li>
-        <h2>{{ restaurant.name }}</h2>
-    </li>
-    {% endfor %}
-</ul>
-{% else %}
-<p>No results found for your search.</p>
-{% endif %}
+    {% if results %}
+    <div class="grid grid-3">
+      {% for restaurant in results %}
+      <a
+        href="{{ url_for('UserMenu', restaurant_id=restaurant.id) }}"
+        style="text-decoration: none; color: inherit"
+      >
+        <div class="restaurant-card">
+          <div
+            class="restaurant-image"
+            style="
+              background: linear-gradient(
+                135deg,
+                var(--primary-color) 0%,
+                var(--primary-dark) 100%
+              );
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              font-size: 3rem;
+              color: white;
+            "
+          >
+            🍽️
+          </div>
+          <div class="restaurant-info">
+            <div class="restaurant-name">{{ restaurant.name }}</div>
+            <div class="restaurant-meta">
+              <div class="rating">★ 4.5</div>
+              <span class="delivery-time">30 mins</span>
+            </div>
+            <p
+              style="
+                font-size: 0.85rem;
+                color: var(--text-secondary);
+                margin: 0.5rem 0 0 0;
+              "
+            >
+              Indian, Chinese, Continental
+            </p>
+          </div>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="alert alert-warning text-center" style="padding: 3rem">
+      <div style="font-size: 2rem; margin-bottom: 1rem">🔍</div>
+      <h4>No results found</h4>
+      <p>Try searching with different keywords or browse all restaurants</p>
+      <a href="{{ url_for('restaurants') }}" class="btn btn-primary mt-2"
+        >Browse All Restaurants</a
+      >
+    </div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

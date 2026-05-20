@@ -1,12 +1,42 @@
 /* Small modern overrides to complement Bootstrap */
-body { background: #f7f9fc; color: #222; }
-.navbar-brand { font-weight: 700; }
-.card { border-radius: 12px; }
-.hero { padding: 4rem 1rem; }
-.restaurants-container { display: grid; grid-template-columns: repeat(auto-fit,minmax(220px,1fr)); gap: 1rem; }
-.restaurant-item a { display:block; padding: 1rem; background:#fff; border-radius:8px; text-decoration:none; color:#212529; box-shadow:0 1px 4px rgba(0,0,0,0.05);} 
-.restaurant-item a:hover { transform: translateY(-2px); transition: .15s; box-shadow:0 6px 18px rgba(0,0,0,0.08);} 
-.list-group-item { border-radius:8px; margin-bottom:6px; }
+body {
+  background: #f7f9fc;
+  color: #222;
+}
+.navbar-brand {
+  font-weight: 700;
+}
+.card {
+  border-radius: 12px;
+}
+.hero {
+  padding: 4rem 1rem;
+}
+.restaurants-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+}
+.restaurant-item a {
+  display: block;
+  padding: 1rem;
+  background: #fff;
+  border-radius: 8px;
+  text-decoration: none;
+  color: #212529;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+}
+.restaurant-item a:hover {
+  transform: translateY(-2px);
+  transition: 0.15s;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+}
+.list-group-item {
+  border-radius: 8px;
+  margin-bottom: 6px;
+}
 
 /* Toast tweaks */
-.toast { max-width: 360px; }
+.toast {
+  max-width: 360px;
+}

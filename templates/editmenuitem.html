@@ -1,19 +1,52 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edit Page</title>
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='restaurant.css') }}">
-</head>
-<body>
-    <form action= "{{url_for('editMenuItem', restaurant_id = restaurant_id, menu_id=item.id)}}" method = 'POST'>
+{% extends 'base.html' %} {% block title %}Edit Menu Item - Zwiggy{% endblock %}
+{% block content %}
+<section
+  class="section"
+  style="
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 70vh;
+  "
+>
+  <div class="container" style="max-width: 600px">
+    <div class="card">
+      <div class="card-body p-4">
+        <div class="text-center mb-4">
+          <div style="font-size: 2.5rem; margin-bottom: 1rem">✏️</div>
+          <h2>Edit Menu Item</h2>
+          <p style="color: var(--text-secondary)">{{ item.name }}</p>
+        </div>
 
-        <p>Name:</p>
-        <input type = 'text' size='30' name = 'name' placeholder = '{{item.name}}'>
-        
-        <input type='submit' value='Edit'>
-    </form>
-    <a href= "{{url_for('restaurantMenu', restaurant_id= item.restaurant_id)}}">Cancel</a>
-</body>
-</html>
+        <form
+          action="{{ url_for('editMenuItem', restaurant_id=restaurant_id, menu_id=item.id) }}"
+          method="POST"
+        >
+          <div class="form-group">
+            <label>Item Name *</label>
+            <input
+              class="form-control"
+              type="text"
+              name="name"
+              placeholder="{{ item.name }}"
+              value="{{ item.name }}"
+              required
+            />
+          </div>
+
+          <div class="flex" style="gap: 1rem">
+            <button class="btn btn-primary btn-block" type="submit">
+              Save Changes
+            </button>
+            <a
+              href="{{ url_for('restaurantMenu', restaurant_id=item.restaurant_id) }}"
+              class="btn btn-secondary btn-block"
+              >Cancel</a
+            >
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

@@ -1,81 +1,57 @@
-<html>
+{% extends 'base.html' %}
 
-<head>
-	<link rel=stylesheet type=text/css href="{{ url_for('static', filename='styles.css') }}">
-</head>
+{% block title %}{{ restaurant.name }} - Manage Menu | Zwiggy{% endblock %}
 
+{% block content %}
+<section class="section">
+    <div class="container">
+        <!-- Restaurant Header -->
+        <div style="background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%); color: white; padding: 2rem; border-radius: 1rem; margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <h1 style="color: white; margin: 0;">{{ restaurant.name }}</h1>
+                <p style="color: rgba(255, 255, 255, 0.9); margin: 0.5rem 0 0 0;">Restaurant Management</p>
+            </div>
+            <div class="flex-column" style="gap: 1rem;">
+                <a href="{{ url_for('newMenuItem', restaurant_id=restaurant.id) }}" class="btn btn-primary btn-large" style="background: white; color: var(--primary-color);">+ Add Item</a>
+                <form action="{{ url_for('delete', restaurant_id=restaurant.id) }}" method="POST" style="display: inline;">
+                    <button type="submit" class="btn btn-outline" style="border-color: white; color: white; width: 100%;">Delete Restaurant</button>
+                </form>
+            </div>
+        </div>
 
-<body color = 'blue'>
-
-	<div class='pane'>
-		<div class='header'>
-			<h1>{{ restaurant.name }}</h1>
-		</div>
-
-		<div class='flash'>
-			{% with messages = get_flashed_messages() %}
-			{% if messages %}
-
-			<ul>
-				{% for message in messages %}
-				<li class = 'message'> <strong> {{ message }} </strong> </li>
-				{% endfor %}
-			</ul>
-			{% endif %}
-			{% endwith %}
-
-		</div>
-
-		<div class = 'create-new-button'>
-			<a href="{{url_for('newMenuItem', restaurant_id=restaurant.id) }}">Create New Item</a>
-		</div>
-
-		<div class = 'create-new-button'>
-			<form action="{{ url_for('delete', restaurant_id=restaurant.id) }}" method="POST" style="display:inline;">
-				<button type="submit">Delete</button>
-			</form>			
-		</div>
-
-		{% for i in items %}
-		<div class='nameAndPrice'>
-			<span class='name'>
-				<p>{{i.name}}</p>
-			</span>
-
-			<span class='price'>
-
-
-				<p>{{i.price}} </p>
-			</span>
-		</div>
-
-
-
-		<div class='description'>
-			<p>{{i.description}}</p>
-		</div>
-		
-
-
-		<div class="editdeletepane">
-
-			<a href='{{url_for('editMenuItem',restaurant_id=restaurant.id, menu_id=i.id)}}'>Rename</a><br>
-			<a href='{{url_for('deleteMenuItem', restaurant_id=restaurant.id, menu_id=i.id)}}'>Erase</a>
-		</div>
-
-		<br>
-		<br>
-
-
-
-		{% endfor %}
-
-
-
-
-
-	</div>
-	</div>
-</body>
+        <!-- Menu Items -->
+        {% if items %}
+            <h2 class="section-title">Menu Items</h2>
+            <div class="grid grid-2">
+                {% for item in items %}
+                    <div class="menu-item">
+                        <div class="item-header">
+                            <h4 class="item-name">{{ item.name }}</h4>
+                            <div class="item-veg">V</div>
+                        </div>
+                        {% if item.course %}
+                            <p style="font-size: 0.8rem; color: var(--text-light); margin: 0 0 0.5rem 0;">{{ item.course }}</p>
+                        {% endif %}
+                        <p class="item-description">{{ item.description or 'Item description' }}</p>
+                        <div class="item-footer">
+                            <span class="item-price">₹{{ item.price }}</span>
+                            <div class="item-actions">
+                                <a href="{{ url_for('editMenuItem', restaurant_id=restaurant.id, menu_id=item.id) }}" class="btn btn-secondary btn-small">✏️ Edit</a>
+                                <a href="{{ url_for('deleteMenuItem', restaurant_id=restaurant.id, menu_id=item.id) }}" class="btn btn-secondary btn-small" style="background: #ffebee; color: var(--error-color);">🗑️ Delete</a>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="alert alert-info text-center" style="padding: 3rem;">
+                <h4>No menu items yet</h4>
+                <p>Start by adding your first menu item</p>
+                <a href="{{ url_for('newMenuItem', restaurant_id=restaurant.id) }}" class="btn btn-primary mt-2">Add First Item</a>
+            </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}
 
 </html>

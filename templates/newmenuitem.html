@@ -1,29 +1,83 @@
-</html>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Add Item</title>
-</head>
-<body>
-    <h1> New Menu Item </h1>
+{% extends 'base.html' %} {% block title %}Add Menu Item - Zwiggy{% endblock %}
+{% block content %}
+<section
+  class="section"
+  style="
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 70vh;
+  "
+>
+  <div class="container" style="max-width: 600px">
+    <div class="card">
+      <div class="card-body p-4">
+        <div class="text-center mb-4">
+          <div style="font-size: 2.5rem; margin-bottom: 1rem">➕</div>
+          <h2>Add New Menu Item</h2>
+          <p style="color: var(--text-secondary)">to {{ restaurant.name }}</p>
+        </div>
 
-        <form action="{{ url_for('newMenuItem', restaurant_id=restaurant.id) }}" method="POST">
+        <form
+          action="{{ url_for('newMenuItem', restaurant_id=restaurant.id) }}"
+          method="POST"
+        >
+          <div class="form-group">
+            <label>Item Name *</label>
+            <input
+              class="form-control"
+              type="text"
+              name="name"
+              placeholder="e.g., Butter Chicken"
+              required
+            />
+          </div>
 
-            <p>Name:</p>
-            <input type="text" name="name" size="30" required>
+          <div class="form-group">
+            <label>Course/Category</label>
+            <input
+              class="form-control"
+              type="text"
+              name="course"
+              placeholder="e.g., Main Course"
+            />
+          </div>
 
-            <p>Course:</p>
-            <input type="text" name="course" size="30">
+          <div class="form-group">
+            <label>Description</label>
+            <textarea
+              class="form-control"
+              name="description"
+              placeholder="Describe your item..."
+              rows="4"
+            ></textarea>
+          </div>
 
-            <p>Description:</p>
-            <textarea name="description" rows="4" cols="30"></textarea>
+          <div class="form-group">
+            <label>Price (₹) *</label>
+            <input
+              class="form-control"
+              type="number"
+              name="price"
+              step="0.01"
+              placeholder="0.00"
+              required
+            />
+          </div>
 
-            <p>Price:</p>
-            <input type="number" name="price" step="0.01" required>
-
-            <input type="submit" value="Create">
+          <div class="flex" style="gap: 1rem">
+            <button class="btn btn-primary btn-block" type="submit">
+              Create Item
+            </button>
+            <a
+              href="{{ url_for('restaurantMenu', restaurant_id=restaurant.id) }}"
+              class="btn btn-secondary btn-block"
+              >Cancel</a
+            >
+          </div>
         </form>
-</body>
-</html>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

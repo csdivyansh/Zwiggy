@@ -1,77 +1,204 @@
-<div class="container">
-  <link
-    rel="stylesheet"
-    type="text/css"
-    href="{{ url_for('static', filename='admin_dashboard.css') }}"
-  />
-  <h1>Admin Dashboard</h1>
+{% extends 'base.html' %} {% block title %}Admin Dashboard - Zwiggy{% endblock
+%} {% block content %}
+<section class="section">
+  <div class="container">
+    <h1>Admin Dashboard</h1>
 
-  <!-- Unauthorized User Count -->
-  <div class="pending-users-container">
-    <h3>
-      Unapproved Users
-      <span class="pending-users-count">{{ pending_users_count }}</span>
-    </h3>
-  </div>
-
-  <!-- User Table -->
-  <table>
-    <thead>
-      <tr>
-        <th>Username</th>
-        <th>Role</th>
-        <th>Status</th>
-        <th>Action</th>
-      </tr>
-      {% with messages = get_flashed_messages(with_categories=true) %} {% if
-      messages %}
-      <div class="flash-messages">
-        {% for category, message in messages %}
-        <p class="{{ category }}">{{ message }}</p>
-        {% endfor %}
+    <!-- Stats Cards -->
+    <div class="grid grid-4" style="margin-bottom: 2rem">
+      <div class="card">
+        <div class="card-body text-center">
+          <div style="font-size: 2.5rem; margin-bottom: 1rem">👥</div>
+          <div
+            style="
+              font-size: 2rem;
+              font-weight: 700;
+              color: var(--primary-color);
+            "
+          >
+            {{ pending_users_count }}
+          </div>
+          <p style="margin: 0; color: var(--text-secondary)">
+            Pending Approvals
+          </p>
+        </div>
       </div>
-      {% endif %} {% endwith %}
-    </thead>
-    <tbody>
-      {% for user in users %}
-      <tr>
-        <td>{{ user.username }}</td>
-        <td>{{ user.role.title() }}</td>
-        <td>
-          {% if user.role =='owner' %} Owner {% endif %} {% if user.is_approved
-          and user.role != 'owner' %} Approved {% endif %} {% if user.role ==
-          'rejected' %} Rejected {% endif %} {% if user.is_approved == 0 and
-          user.role != 'rejected' %} Pending {% endif %}
-        </td>
+      <div class="card">
+        <div class="card-body text-center">
+          <div style="font-size: 2.5rem; margin-bottom: 1rem">🏪</div>
+          <div
+            style="
+              font-size: 2rem;
+              font-weight: 700;
+              color: var(--primary-color);
+            "
+          >
+            {{ users|length }}
+          </div>
+          <p style="margin: 0; color: var(--text-secondary)">Total Users</p>
+        </div>
+      </div>
+    </div>
 
-        <td>
-          {% if not user.is_approved and user.role == 'rejected' %}
-          <form
-            action="{{ url_for('approve_user', user_id=user.id) }}"
-            method="POST"
-          >
-            <button type="submit" class="approve-btn">Approve</button>
-          </form>
-          &nbsp;
-          {% endif %} {% if not user.is_approved and user.role != 'rejected' %}
-          <form
-            action="{{ url_for('reject_user', user_id=user.id) }}"
-            method="POST"
-          >
-            <button type="submit" class="reject-btn">Reject</button>
-          </form>
-          {% endif %} {% if user.role == 'user' and user.is_approved %}
-          <form
-            action="{{ url_for('reject_user', user_id=user.id) }}"
-            method="POST"
-          >
-            <button type="submit" class="reject-btn">Kick Out</button>
-          </form>
-
-          {%endif%}
-        </td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
-</div>
+    <!-- Users Table -->
+    <div class="card">
+      <div class="card-header" style="background: var(--bg-light)">
+        <h3>User Management</h3>
+      </div>
+      <div class="card-body p-0">
+        <div style="overflow-x: auto">
+          <table style="width: 100%; border-collapse: collapse">
+            <thead
+              style="
+                background: var(--bg-light);
+                border-bottom: 2px solid var(--border-color);
+              "
+            >
+              <tr>
+                <th style="padding: 1rem; text-align: left; font-weight: 600">
+                  Username
+                </th>
+                <th style="padding: 1rem; text-align: left; font-weight: 600">
+                  Role
+                </th>
+                <th style="padding: 1rem; text-align: left; font-weight: 600">
+                  Status
+                </th>
+                <th style="padding: 1rem; text-align: left; font-weight: 600">
+                  Actions
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for user in users %}
+              <tr style="border-bottom: 1px solid var(--border-color)">
+                <td style="padding: 1rem">
+                  <strong>{{ user.username }}</strong>
+                </td>
+                <td style="padding: 1rem">
+                  <span
+                    style="
+                      background: var(--primary-light);
+                      color: var(--primary-dark);
+                      padding: 0.3rem 0.8rem;
+                      border-radius: 2rem;
+                      font-size: 0.85rem;
+                      font-weight: 600;
+                    "
+                  >
+                    {{ user.role.title() }}
+                  </span>
+                </td>
+                <td style="padding: 1rem">
+                  {% if user.role == 'owner' %}
+                  <span
+                    style="
+                      background: #d1f7dd;
+                      color: #0f5132;
+                      padding: 0.3rem 0.8rem;
+                      border-radius: 2rem;
+                      font-size: 0.85rem;
+                      font-weight: 600;
+                    "
+                    >Owner</span
+                  >
+                  {% elif user.is_approved and user.role != 'owner' %}
+                  <span
+                    style="
+                      background: #d1f7dd;
+                      color: #0f5132;
+                      padding: 0.3rem 0.8rem;
+                      border-radius: 2rem;
+                      font-size: 0.85rem;
+                      font-weight: 600;
+                    "
+                    >✓ Approved</span
+                  >
+                  {% elif user.role == 'rejected' %}
+                  <span
+                    style="
+                      background: #f8d7da;
+                      color: #721c24;
+                      padding: 0.3rem 0.8rem;
+                      border-radius: 2rem;
+                      font-size: 0.85rem;
+                      font-weight: 600;
+                    "
+                    >Rejected</span
+                  >
+                  {% else %}
+                  <span
+                    style="
+                      background: #fff3cd;
+                      color: #856404;
+                      padding: 0.3rem 0.8rem;
+                      border-radius: 2rem;
+                      font-size: 0.85rem;
+                      font-weight: 600;
+                    "
+                    >⏳ Pending</span
+                  >
+                  {% endif %}
+                </td>
+                <td style="padding: 1rem">
+                  <div class="flex" style="gap: 0.5rem">
+                    {% if not user.is_approved and user.role != 'rejected' %}
+                    <form
+                      action="{{ url_for('approve_user', user_id=user.id) }}"
+                      method="POST"
+                      style="display: inline"
+                    >
+                      <button type="submit" class="btn btn-primary btn-small">
+                        Approve
+                      </button>
+                    </form>
+                    <form
+                      action="{{ url_for('reject_user', user_id=user.id) }}"
+                      method="POST"
+                      style="display: inline"
+                    >
+                      <button
+                        type="submit"
+                        class="btn btn-secondary btn-small"
+                        style="background: #ffebee; color: var(--error-color)"
+                      >
+                        Reject
+                      </button>
+                    </form>
+                    {% elif not user.is_approved and user.role == 'rejected' %}
+                    <form
+                      action="{{ url_for('approve_user', user_id=user.id) }}"
+                      method="POST"
+                      style="display: inline"
+                    >
+                      <button type="submit" class="btn btn-primary btn-small">
+                        Approve
+                      </button>
+                    </form>
+                    {% elif user.role == 'user' and user.is_approved %}
+                    <form
+                      action="{{ url_for('reject_user', user_id=user.id) }}"
+                      method="POST"
+                      style="display: inline"
+                    >
+                      <button
+                        type="submit"
+                        class="btn btn-secondary btn-small"
+                        style="background: #ffebee; color: var(--error-color)"
+                      >
+                        Kick Out
+                      </button>
+                    </form>
+                    {% endif %}
+                  </div>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

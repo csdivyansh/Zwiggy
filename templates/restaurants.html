@@ -1,28 +1,84 @@
 {% extends 'base.html' %} {% block title %}Restaurants - Zwiggy{% endblock %} {%
 block content %}
-<div class="d-flex justify-content-between align-items-center mb-3">
-  <h2>Restaurants</h2>
-  <form class="d-flex" method="GET" action="{{ url_for('search_restaurant') }}">
-    <input
-      class="form-control me-2"
-      type="search"
-      name="query"
-      placeholder="Search restaurants..."
-      value="{{ query }}"
-    />
-    <button class="btn btn-outline-secondary" type="submit">Search</button>
-  </form>
-</div>
+<section class="section">
+  <div class="container">
+    <!-- Header with Search -->
+    <div class="flex-between mb-4" style="flex-wrap: wrap; gap: 1rem">
+      <h1>Explore Restaurants</h1>
+      <form
+        method="GET"
+        action="{{ url_for('search_restaurant') }}"
+        style="flex: 1; max-width: 400px"
+      >
+        <div class="search-bar">
+          <span>🔍</span>
+          <input
+            type="search"
+            name="query"
+            placeholder="Search restaurants..."
+            value="{{ query or '' }}"
+            class="form-control"
+            style="border: none; padding: 0; margin: 0"
+          />
+          <button class="btn btn-primary btn-small" type="submit">
+            Search
+          </button>
+        </div>
+      </form>
+    </div>
 
-<div class="list-group">
-  {% if restaurants %} {% for r in restaurants %}
-  <a
-    class="list-group-item list-group-item-action"
-    href="{{ url_for('UserMenu', restaurant_id=r.id) }}"
-    >{{ r.name }}</a
-  >
-  {% endfor %} {% else %}
-  <div class="alert alert-warning">No restaurants found.</div>
-  {% endif %}
-</div>
+    <!-- Restaurants Grid -->
+    {% if restaurants %}
+    <div class="grid grid-3">
+      {% for restaurant in restaurants %}
+      <a
+        href="{{ url_for('UserMenu', restaurant_id=restaurant.id) }}"
+        style="text-decoration: none; color: inherit"
+      >
+        <div class="restaurant-card">
+          <div
+            class="restaurant-image"
+            style="
+              background: linear-gradient(
+                135deg,
+                var(--primary-color) 0%,
+                var(--primary-dark) 100%
+              );
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              font-size: 3rem;
+              color: white;
+            "
+          >
+            🍽️
+          </div>
+          <div class="restaurant-info">
+            <div class="restaurant-name">{{ restaurant.name }}</div>
+            <div class="restaurant-meta">
+              <div class="rating">★ 4.5</div>
+              <span class="delivery-time">30 mins</span>
+            </div>
+            <p
+              style="
+                font-size: 0.85rem;
+                color: var(--text-secondary);
+                margin: 0.5rem 0 0 0;
+              "
+            >
+              Indian, Chinese, Continental
+            </p>
+          </div>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="alert alert-info text-center" style="padding: 2rem">
+      <h4>No restaurants found</h4>
+      <p>Try searching for a different term or check back later</p>
+    </div>
+    {% endif %}
+  </div>
+</section>
 {% endblock %}

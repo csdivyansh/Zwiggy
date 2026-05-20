@@ -1,59 +1,64 @@
-<html>
+{% extends 'base.html' %} {% block title %}{{ restaurant.name }} - Menu |
+Zwiggy{% endblock %} {% block content %}
+<section class="section">
+  <div class="container">
+    <!-- Restaurant Header -->
+    <div
+      style="
+        background: linear-gradient(
+          135deg,
+          var(--primary-color) 0%,
+          var(--primary-dark) 100%
+        );
+        color: white;
+        padding: 2rem;
+        border-radius: 1rem;
+        margin-bottom: 2rem;
+      "
+    >
+      <h1 style="color: white; margin: 0">{{ restaurant.name }}</h1>
+      <p style="color: rgba(255, 255, 255, 0.9); margin: 0.5rem 0 0 0">
+        🌟 4.5 • 📦 30 mins • 💰 Free delivery
+      </p>
+    </div>
 
-<head>
-	<link rel=stylesheet type=text/css href="{{ url_for('static', filename='styles.css') }}">
-</head>
-
-
-<body color = 'blue'>
-
-	<div class='pane'>
-		<div class='header'>
-			<h1>{{ restaurant.name }}</h1>
-		</div>
-
-		<div class='flash'>
-			{% with messages = get_flashed_messages() %}
-			{% if messages %}
-
-			<ul>
-				{% for message in messages %}
-				<li class = 'message'> <strong> {{ message }} </strong> </li>
-				{% endfor %}
-			</ul>
-			{% endif %}
-			{% endwith %}
-
-		</div>
-
-
-		{% for i in items %}
-		<div class='nameAndPrice'>
-			<span class='name'>
-				<p>{{i.name}}</p>
-			</span>
-
-			<span class='price'>
-
-
-				<p>{{i.price}} </p>
-			</span>
-		</div>
-
-
-
-		<div class='description'>
-			<p>{{i.description}}</p>
-		</div>
-		
-		{% endfor %}
-
-
-
-
-
-	</div>
-	</div>
-</body>
-
-</html>
+    <!-- Menu Items Grid -->
+    {% if items %}
+    <h2 class="section-title">Menu</h2>
+    <div class="grid grid-2">
+      {% for item in items %}
+      <div class="menu-item">
+        <div class="item-header">
+          <h4 class="item-name">{{ item.name }}</h4>
+          <div class="item-veg">V</div>
+        </div>
+        {% if item.course %}
+        <p
+          style="
+            font-size: 0.8rem;
+            color: var(--text-light);
+            margin: 0 0 0.5rem 0;
+          "
+        >
+          {{ item.course }}
+        </p>
+        {% endif %}
+        <p class="item-description">
+          {{ item.description or 'Delicious item' }}
+        </p>
+        <div class="item-footer">
+          <span class="item-price">₹{{ item.price }}</span>
+          <button class="btn btn-primary btn-small">+ Add</button>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="alert alert-info text-center" style="padding: 3rem">
+      <h4>No items available</h4>
+      <p>This restaurant hasn't added any menu items yet</p>
+    </div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

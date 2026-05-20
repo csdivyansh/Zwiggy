@@ -1,42 +1,73 @@
-{% extends 'base.html' %} {% block title %}Login - Zwiggy{% endblock %} {% block
-content %}
-<div class="row justify-content-center">
-  <div class="col-md-6">
-    <div class="card shadow-sm">
-      <div class="card-body">
-        <h3 class="card-title mb-3">Login</h3>
+{% extends 'base.html' %} {% block title %}Restaurant Partner Login - Zwiggy{%
+endblock %} {% block content %}
+<section
+  class="section"
+  style="
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 70vh;
+  "
+>
+  <div class="container" style="max-width: 450px">
+    <div class="card">
+      <div class="card-body p-4">
+        <div class="text-center mb-4">
+          <div style="font-size: 3rem; margin-bottom: 1rem">🏪</div>
+          <h2>Partner Login</h2>
+          <p style="color: var(--text-secondary)">
+            Restaurant partner dashboard
+          </p>
+        </div>
+
         <form action="{{ url_for('login') }}" method="POST">
-          <div class="mb-3">
+          <div class="form-group">
+            <label>Username</label>
             <input
               class="form-control"
               type="text"
               name="username"
-              placeholder="Username"
+              placeholder="Enter your username"
               required
             />
           </div>
-          <div class="mb-3">
+
+          <div class="form-group">
+            <label>Password</label>
             <input
               class="form-control"
               type="password"
               name="password"
-              placeholder="Password"
+              placeholder="Enter your password"
               required
             />
           </div>
 
-          <div class="mb-3 d-flex align-items-center">
-            <img
-              id="captcha-image"
-              src="{{ url_for('captcha_image') }}"
-              alt="Captcha"
-              class="me-3"
-              style="height: 50px"
-            />
-            <a href="#" id="refresh-captcha">Refresh</a>
-          </div>
-
-          <div class="mb-3">
+          <div class="form-group">
+            <label>CAPTCHA</label>
+            <div
+              class="flex-between"
+              style="
+                margin-bottom: 1rem;
+                background: var(--bg-light);
+                padding: 1rem;
+                border-radius: 0.5rem;
+              "
+            >
+              <img
+                id="captcha-image"
+                src="{{ url_for('captcha_image') }}"
+                alt="Captcha"
+                style="height: 60px; width: 150px"
+              />
+              <button
+                type="button"
+                class="btn btn-outline btn-small"
+                id="refresh-captcha"
+              >
+                🔄
+              </button>
+            </div>
             <input
               class="form-control"
               type="text"
@@ -46,24 +77,39 @@ content %}
             />
           </div>
 
-          <button class="btn btn-primary w-100" type="submit">Login</button>
+          <button class="btn btn-primary btn-block mt-3" type="submit">
+            Login
+          </button>
         </form>
-        <p class="mt-3">
-          Don't have an account?
-          <a href="{{ url_for('register') }}">Register</a>
-        </p>
+
+        <div
+          style="
+            text-align: center;
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border-color);
+          "
+        >
+          <p style="margin: 0; color: var(--text-secondary)">
+            New restaurant?
+            <a href="{{ url_for('register') }}" style="font-weight: 600"
+              >Register here</a
+            >
+          </p>
+        </div>
       </div>
     </div>
   </div>
-</div>
-{% endblock %} {% block scripts %}
+</section>
+
+{% block extra_js %}
 <script>
   document
     .getElementById("refresh-captcha")
-    ?.addEventListener("click", function (e) {
+    .addEventListener("click", function (e) {
       e.preventDefault();
-      const captchaImage = document.getElementById("captcha-image");
-      captchaImage.src = "{{ url_for('captcha_image') }}" + "?t=" + Date.now();
+      const img = document.getElementById("captcha-image");
+      img.src = "{{ url_for('captcha_image') }}" + "?t=" + Date.now();
     });
 </script>
-{% endblock %}
+{% endblock %} {% endblock %}

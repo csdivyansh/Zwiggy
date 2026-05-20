@@ -1,18 +1,49 @@
-<html>
+{% extends 'base.html' %} {% block title %}Delete Menu Item - Zwiggy{% endblock
+%} {% block content %}
+<section
+  class="section"
+  style="
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 70vh;
+  "
+>
+  <div class="container" style="max-width: 500px">
+    <div class="card" style="border: 2px solid #f8d7da">
+      <div class="card-body p-4 text-center">
+        <div style="font-size: 3rem; margin-bottom: 1rem">⚠️</div>
+        <h2 style="color: var(--error-color)">Delete Item?</h2>
+        <p style="color: var(--text-secondary); margin: 1rem 0">
+          Are you sure you want to delete <strong>{{ item.name }}</strong>?
+        </p>
+        <p style="color: var(--text-light); font-size: 0.9rem">
+          This action cannot be undone.
+        </p>
 
-<body>
-<h1> Are you sure you want to delete {{item.name}}? </h1>
-
-<form action="{{ url_for('deleteMenuItem', restaurant_id=item.restaurant_id, menu_id=item.id)}}" method = 'post'>
-
-<input type='submit', value = 'Delete'>
-
-
-
-
-</form>
-
-<a href = "{{ url_for('restaurantMenu', restaurant_id = item.restaurant_id)}}"> Cancel </a>
-</body>
-
-</html>
+        <div class="flex" style="gap: 1rem; margin-top: 2rem">
+          <form
+            action="{{ url_for('deleteMenuItem', restaurant_id=item.restaurant_id, menu_id=item.id) }}"
+            method="POST"
+            style="flex: 1"
+          >
+            <button
+              class="btn btn-block"
+              style="background: var(--error-color); color: white"
+              type="submit"
+            >
+              Delete Item
+            </button>
+          </form>
+          <a
+            href="{{ url_for('restaurantMenu', restaurant_id=item.restaurant_id) }}"
+            class="btn btn-secondary btn-block"
+            style="flex: 1"
+            >Cancel</a
+          >
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
